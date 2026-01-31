@@ -1,359 +1,299 @@
-# Chemical Equipment Parameter Visualizer
-## Hybrid Web + Desktop Application
+# ⚗️ ChemFlow Analytics  
+**Production-Ready Hybrid Chemical Equipment Analysis Platform**
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![Django](https://img.shields.io/badge/Django-4.2-green.svg)
-![React](https://img.shields.io/badge/React-18.2-61DAFB.svg)
-![PyQt5](https://img.shields.io/badge/PyQt5-5.15-41CD52.svg)
-
-A production-ready hybrid application for uploading, analyzing, and visualizing chemical equipment parameter data. Features a **Django REST API** backend, **React web frontend** with GSAP animations, and a **PyQt5 desktop application**.
-
----
-
-## 🎯 Features
-
-### Core Functionality
-- ✅ **CSV Upload & Parsing** - Upload equipment data via drag-and-drop or file browser
-- ✅ **Real-time Statistics** - Automatic computation of averages and distributions
-- ✅ **Interactive Charts** - Dynamic visualizations with Chart.js (web) and Matplotlib (desktop)
-- ✅ **PDF Reports** - Downloadable professional reports with ReportLab
-- ✅ **History Management** - Automatic storage of last 5 datasets
-- ✅ **JWT Authentication** - Secure token-based authentication
-- ✅ **Dual Platform Support** - Web and desktop apps sharing the same API
-
-### Web Frontend (React + GSAP)
-- 🎬 **Animated Landing Page** with GSAP Timeline and ScrollTrigger
-- 🎨 **Modern Dark Theme** with vibrant gradients and glassmorphism
-- 🔄 **3D Hover Effects** on feature cards
-- 📊 **Chart.js Visualizations** (Pie, Bar, Line charts)
-- 📱 **Fully Responsive** design for all screen sizes
-- ⚡ **Smooth Animations** throughout the user experience
-
-### Desktop Frontend (PyQt5)
-- 🖥️ **Native Desktop UI** with modern dark theme
-- 📈 **Matplotlib Charts** embedded in Qt widgets
-- 📋 **Data Table View** with sortable columns
-- 🔐 **Secure Login** with registration support
-- 📥 **CSV Upload Dialog** with progress feedback
-- 📄 **PDF Download** with file save dialog
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
+[![React](https://img.shields.io/badge/React-18.2-61DAFB.svg)](https://react.dev/)
+[![PyQt5](https://img.shields.io/badge/PyQt5-5.15-41CD52.svg)](https://www.riverbankcomputing.com/software/pyqt/)
+[![GitHub](https://img.shields.io/badge/GitHub-ChemFlow--Analytics-black.svg)](https://github.com/RITHIKKUMARAN/ChemFlow-Analytics)
 
 ---
 
-## 🏗️ Architecture
+## 🚀 **What is ChemFlow Analytics?**
+
+**ChemFlow Analytics** is a modern, production-ready hybrid application designed for chemical engineers and researchers to upload, analyze, and visualize chemical equipment parameter data. With stunning animations, interactive charts, and professional PDF reports, it transforms raw CSV data into actionable insights.
+
+### **Key Highlights**
+- 🌐 **Web Application** - Beautiful React frontend with GSAP animations
+- 🖥️ **Desktop Application** - Native PyQt5 app for offline use
+- 🔗 **Unified Backend** - Single Django REST API serving both platforms
+- 📊 **Interactive Visualizations** - Chart.js (web) and Matplotlib (desktop)
+- 📄 **PDF Reports** - Professional reports with ReportLab
+- 🔐 **Secure** - JWT authentication for data privacy
+
+---
+
+## ✨ **Features**
+
+### **Data Management**
+- ✅ **CSV Upload** - Drag-and-drop or browse
+- ✅ **Smart Parsing** - Pandas-powered data validation
+- ✅ **History Management** - Auto-stores last 5 datasets
+- ✅ **Real-time Statistics** - Instant calculations
+
+### **Visualizations**
+- 📊 **Equipment Distribution** - Pie charts
+- 📈 **Flowrate & Pressure Analysis** - Bar charts
+- 🌡️ **Temperature Trends** - Line charts
+- 🎨 **Interactive & Animated** - GSAP-powered transitions
+
+### **Reporting**
+- 📄 **PDF Generation** - Comprehensive reports
+- 📥 **One-Click Download** - Save reports locally
+- 📋 **Detailed Analytics** - Stats, charts, metadata
+
+### **User Experience**
+- 🎬 **Smooth Animations** - GSAP Timeline & ScrollTrigger
+- 🎨 **Modern Dark Theme** - Glassmorphism & gradients
+- 📱 **Fully Responsive** - Works on all devices
+- ⚡ **Fast & Efficient** - Optimized performance
+
+---
+
+## 🏗️ **Architecture**
 
 ```
-┌─────────────────────────────────────────────────┐
-│                                                 │
-│              Django REST API Backend            │
-│         (SQLite, Pandas, ReportLab, JWT)        │
-│                                                 │
-└────────────┬──────────────────────┬─────────────┘
-             │                      │
-             │   HTTP REST API      │
-             │                      │
-    ┌────────▼────────┐    ┌────────▼────────┐
-    │                 │    │                 │
-    │   React Web     │    │  PyQt5 Desktop  │
-    │   (GSAP+Charts) │    │  (Matplotlib)   │
-    │                 │    │                 │
-    └─────────────────┘    └─────────────────┘
+                    ChemFlow Analytics
+                           │
+                           ▼
+              ┌────────────────────────┐
+              │   Django REST API      │
+              │  (JWT + Pandas + PDF)  │
+              └────────────┬───────────┘
+                           │
+                ┌──────────┴──────────┐
+                │                     │
+                ▼                     ▼
+        ┌───────────────┐    ┌──────────────┐
+        │  React Web    │    │ PyQt5 Desktop│
+        │  GSAP + Charts│    │  Matplotlib  │
+        └───────────────┘    └──────────────┘
 ```
 
 ---
 
-## 📋 API Endpoints
+## 🛠️ **Technology Stack**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Register new user |
-| `POST` | `/api/auth/login` | Login and get JWT tokens |
-| `POST` | `/api/upload-csv` | Upload CSV file |
-| `GET` | `/api/summary?dataset_id=<id>` | Get statistics summary |
-| `GET` | `/api/history` | Get upload history |
-| `GET` | `/api/dataset/<id>` | Get dataset details |
-| `GET` | `/api/report/pdf?dataset_id=<id>` | Download PDF report |
+### **Backend**
+| Technology | Purpose |
+|------------|---------|
+| Django 4.2 | Web framework |
+| Django REST Framework | RESTful API |
+| JWT | Authentication |
+| Pandas | CSV parsing |
+| ReportLab | PDF generation |
+| SQLite | Database |
+
+### **Web Frontend**
+| Technology | Purpose |
+|------------|---------|
+| React 18.2 | UI library |
+| Vite | Build tool |
+| GSAP | Animations |
+| Chart.js | Charts |
+| Axios | HTTP client |
+
+### **Desktop Frontend**
+| Technology | Purpose |
+|------------|---------|
+| PyQt5 5.15 | GUI framework |
+| Matplotlib | Charts |
+| Requests | HTTP client |
 
 ---
 
-## 🚀 Quick Start
+## 📦 **Installation**
 
-### Prerequisites
-- **Python 3.9+**
-- **Node.js 16+** and **npm**
-- **Git** (for version control)
+### **Quick Start (Automated)**
 
-### 1️⃣ Backend Setup (Django)
-
+**Windows:**
 ```bash
-# Navigate to backend directory
+setup.bat
+```
+
+**macOS/Linux:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+### **Manual Setup**
+
+#### **1. Backend Setup**
+```bash
 cd backend
-
-# Create virtual environment
 python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # macOS/Linux
 
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Copy environment variables
-copy .env.example .env
-# Edit .env and set SECRET_KEY
-
-# Run migrations
-python manage.py makemigrations
+cp .env.example .env
 python manage.py migrate
-
-# Create superuser (optional)
-python manage.py createsuperuser
-
-# Run development server
 python manage.py runserver
 ```
+✅ Running on `http://localhost:8000`
 
-Backend will run at `http://localhost:8000`
-
-### 2️⃣ Web Frontend Setup (React)
-
+#### **2. Web Frontend Setup**
 ```bash
-# Navigate to web frontend directory
 cd web-frontend
-
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
 ```
+✅ Running on `http://localhost:5173`
 
-Web app will run at `http://localhost:5173`
-
-### 3️⃣ Desktop App Setup (PyQt5)
-
+#### **3. Desktop App Setup**
 ```bash
-# Navigate to desktop app directory
 cd desktop-app
-
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# Windows:
 venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Run desktop application
 python main.py
 ```
+✅ Application launched!
 
 ---
 
-## 📊 Sample Data
+## 🎯 **Usage**
 
-A sample CSV file (`sample_equipment_data.csv`) is included in the root directory with the following structure:
+### **1. Create Account**
+- Open web app or desktop app
+- Click "Get Started" or "Create New Account"
+- Enter username, email, password
+
+### **2. Upload Data**
+- Use provided `sample_equipment_data.csv` or your own
+- Drag-and-drop or click "Browse Files"
+- Watch real-time progress bar
+
+### **3. Analyze**
+- View interactive charts
+- Browse equipment data table
+- Check summary statistics
+
+### **4. Download Report**
+- Click "Download PDF"
+- Comprehensive report with charts and stats
+
+---
+
+## 📊 **CSV Format**
+
+Your CSV must have these columns:
 
 ```csv
 Equipment_ID,Equipment_Type,Flowrate,Pressure,Temperature
 EQ001,Reactor,150.5,25.3,350.2
 EQ002,Heat Exchanger,200.8,30.5,280.5
+EQ003,Pump,180.2,45.8,120.3
 ...
 ```
 
-### CSV Format Requirements
-- **Equipment_ID**: Unique identifier
-- **Equipment_Type**: Type of equipment (e.g., Reactor, Pump, Valve)
-- **Flowrate**: Numeric value
-- **Pressure**: Numeric value
-- **Temperature**: Numeric value
+---
+
+## 🎨 **Screenshots**
+
+### **Web Application**
+- **Landing Page**: Animated hero with GSAP
+- **Dashboard**: Interactive charts and data table
+- **Upload**: Drag-and-drop with progress
+
+### **Desktop Application**
+- **Login**: Modern dark theme
+- **Dashboard**: Statistics cards and Matplotlib charts
+- **Data Table**: Sortable equipment list
 
 ---
 
-## 🎨 Web Frontend Structure
+## 🔒 **Security**
 
-```
-web-frontend/
-├── src/
-│   ├── pages/
-│   │   ├── LandingPage.jsx    # Animated landing with GSAP
-│   │   ├── LoginPage.jsx      # Login with JWT auth
-│   │   ├── RegisterPage.jsx   # Registration form
-│   │   └── Dashboard.jsx      # Main dashboard
-│   ├── components/
-│   │   ├── UploadCSV.jsx      # Drag-and-drop upload
-│   │   ├── Charts.jsx         # Chart.js visualizations
-│   │   ├── DataTable.jsx      # Sortable table
-│   │   └── HistoryPanel.jsx   # Upload history
-│   ├── utils/
-│   │   └── api.js             # Axios API client
-│   ├── App.jsx                # Router configuration
-│   ├── main.jsx               # Entry point
-│   └── index.css              # Design system
-├── package.json
-├── vite.config.js
-└── index.html
-```
+- ✅ **JWT Authentication** - Secure token-based auth
+- ✅ **Password Hashing** - Django's built-in security
+- ✅ **CORS Protection** - Configured for safety
+- ✅ **Input Validation** - Pandas data validation
+-✅ **Environment Variables** - No hardcoded secrets
 
 ---
 
-## 🖥️ Desktop App Structure
+## 🚀 **Deployment**
 
-```
-desktop-app/
-├── windows/
-│   ├── login_window.py        # Login UI
-│   └── main_window.py         # Dashboard UI
-├── widgets/
-│   └── chart_widgets.py       # Matplotlib charts
-├── utils/
-│   └── api_client.py          # HTTP client
-├── dialogs/                   # (Reserved for future dialogs)
-├── main.py                    # Entry point
-└── requirements.txt
-```
+### **Backend (Django)**
+- **Platforms**: Render, Heroku, AWS EC2
+- **Database**: Switch to PostgreSQL/MySQL
+- **Server**: Gunicorn or uWSGI
 
----
+### **Web Frontend (React)**
+- **Platforms**: Vercel, Netlify, AWS S3
+- **Build**: `npm run build`
+- **Deploy**: Upload `dist/` folder
 
-## 🔐 Environment Variables
-
-### Backend (`.env`)
-```env
-SECRET_KEY=your-django-secret-key
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-```
-
-### Web Frontend (`.env`)
-```env
-VITE_API_URL=http://localhost:8000
-```
+### **Desktop App**
+- **Build**: `pyinstaller --onefile --windowed main.py`
+- **Distribute**: Share executable
 
 ---
 
-## 📦 Deployment
+## 📚 **Documentation**
 
-### Backend (Django)
-- Use **Gunicorn** or **uWSGI** for production
-- Deploy on **Render**, **Heroku**, or **AWS EC2**
-- Set `DEBUG=False` and configure `ALLOWED_HOSTS`
-- Use PostgreSQL or MySQL for production database
-
-### Web Frontend (React)
-- Build production bundle: `npm run build`
-- Deploy on **Vercel**, **Netlify**, or **AWS S3 + CloudFront**
-- Update `VITE_API_URL` to production backend URL
-
-### Desktop App
-- Create executable with **PyInstaller**:
-  ```bash
-  pyinstaller --onefile --windowed main.py
-  ```
-- Distribute `.exe` (Windows) or `.app` (macOS)
+- 📖 **[README.md](README.md)** - Complete user guide
+- 🛠️ **[DEVELOPMENT.md](DEVELOPMENT.md)** - Developer documentation
+- ⚡ **[QUICKSTART.md](QUICKSTART.md)** - 5-minute quick start
+- 📋 **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview
 
 ---
 
-## 🧪 Testing
+## 🤝 **Contributing**
 
-### Backend Tests
-```bash
-cd backend
-python manage.py test
-```
+Contributions are welcome! Please follow these steps:
 
-### Manual Testing Checklist
-- [ ] User registration and login
-- [ ] CSV upload (drag-and-drop and file browser)
-- [ ] Data visualization on web and desktop
-- [ ] PDF report download
-- [ ] History management (5 dataset limit)
-- [ ] Error handling for invalid CSV
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ---
 
-## 🛠️ Tech Stack
-
-### Backend
-- **Django 4.2** - Web framework
-- **Django REST Framework** - API
-- **djangorestframework-simplejwt** - JWT authentication
-- **Pandas** - CSV parsing
-- **ReportLab** - PDF generation
-- **SQLite** - Database (development)
-
-### Web Frontend
-- **React 18.2** - UI library
-- **Vite** - Build tool
-- **React Router** - Navigation
-- **Axios** - HTTP client
-- **Chart.js + react-chartjs-2** - Charts
-- **GSAP** - Animations
-
-### Desktop Frontend
-- **PyQt5** - GUI framework
-- **Matplotlib** - Charts
-- **Requests** - HTTP client
-
----
-
-## 📝 License
+## 📝 **License**
 
 This project is licensed under the MIT License.
 
 ---
 
-## 🤝 Contributing
+## 👥 **Credits**
 
-Contributions are welcome! Please follow these steps:
+**Developed by**: [Rithik Kumaran](https://github.com/RITHIKKUMARAN)
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 🐛 Known Issues & Future Enhancements
-
-### Known Issues
-- Desktop app may require manual API URL configuration
-- First-time chart rendering may be slow on large datasets
-
-### Future Enhancements
-- [ ] Real-time data updates with WebSockets
-- [ ] Export to Excel functionality
-- [ ] Custom chart configurations
-- [ ] Multi-user collaboration
-- [ ] Cloud storage integration
+**Technologies Used**:
+- Django & Django REST Framework
+- React & GSAP
+- PyQt5 & Matplotlib
+- Chart.js & ReportLab
 
 ---
 
-## 📞 Support
+## 🌟 **Star This Repo!**
 
-For issues and questions:
-- Open an issue on GitHub
-- Contact: [your-email@example.com]
+If you find ChemFlow Analytics useful, please give it a ⭐ on GitHub!
 
 ---
 
-## 🙏 Acknowledgments
+## 📞 **Support**
 
-- **Django** team for the excellent web framework
-- **React** team for the powerful UI library
-- **GSAP** for stunning animations
-- **Chart.js** for beautiful charts
-- **PyQt** for desktop GUI capabilities
+- 🐛 **Issues**: [GitHub Issues](https://github.com/RITHIKKUMARAN/ChemFlow-Analytics/issues)
+- 📧 **Email**: Contact via GitHub profile
 
 ---
 
-**Made with ❤️ for Chemical Equipment Analysis**
+## 🎉 **Get Started Now!**
 
-© 2026 Chemical Equipment Visualizer | Hybrid Application
+```bash
+git clone https://github.com/RITHIKKUMARAN/ChemFlow-Analytics.git
+cd ChemFlow-Analytics
+./setup.sh  # or setup.bat on Windows
+```
+
+**Transform your chemical equipment data analysis today!** ⚗️📊
+
+---
+
+© 2026 ChemFlow Analytics | Hybrid Application
