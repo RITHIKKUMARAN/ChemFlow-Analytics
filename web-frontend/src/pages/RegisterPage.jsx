@@ -1,279 +1,142 @@
-/**
- * Register Page Component
- */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import gsap from 'gsap';
 
-function RegisterPage() {
+export default function RegisterPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
-        confirmPassword: '',
+        confirmPassword: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        // Entrance animation
-        gsap.from('.register-container', {
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            ease: 'power3.out',
-        });
+        const ctx = gsap.context(() => {
+            gsap.from('.reg-item', {
+                y: 20,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: 'power3.out'
+            });
+        }, containerRef);
+        return () => ctx.revert();
     }, []);
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-        setError('');
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Validate password match
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setError('PASSWORDS_MISMATCH');
             setLoading(false);
-            gsap.fromTo('.register-container',
-                { x: -10 },
-                { x: 10, duration: 0.1, repeat: 5, yoyo: true }
-            );
-            return;
-        }
-
-        // Validate password length
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters long');
-            setLoading(false);
-            gsap.fromTo('.register-container',
-                { x: -10 },
-                { x: 10, duration: 0.1, repeat: 5, yoyo: true }
-            );
             return;
         }
 
         try {
             await authAPI.register(formData.username, formData.email, formData.password);
-
-            // Success animation
-            gsap.to('.register-container', {
-                scale: 0.95,
+            gsap.to(containerRef.current, {
+                scale: 0.98,
                 opacity: 0,
                 duration: 0.3,
-                onComplete: () => {
-                    navigate('/dashboard');
-                },
+                onComplete: () => navigate('/dashboard')
             });
         } catch (err) {
-            const errorMessage = err.response?.data?.username
-                ? 'Username already exists'
-                : err.response?.data?.email
-                    ? 'Email already exists'
-                    : 'Registration failed. Please try again.';
-
-            setError(errorMessage);
+            setError(err.response?.data?.username ? 'USER_ID_CONFLICT' : 'REGISTRATION_FAILED');
             setLoading(false);
-
-            gsap.fromTo('.register-container',
-                { x: -10 },
-                { x: 10, duration: 0.1, repeat: 5, yoyo: true }
+            gsap.fromTo('.surface-card',
+                { x: -5 },
+                { x: 5, duration: 0.1, repeat: 3, yoyo: true }
             );
         }
     };
 
     return (
-        <div style={styles.pageContainer}>
-            <div className="register-container glass" style={styles.registerContainer}>
-                <div style={styles.logoContainer}>
-                    <div style={styles.logo}>⚗️</div>
-                    <h1 style={styles.title}>Create Account</h1>
-                    <p style={styles.subtitle}>Join us to start analyzing your equipment data</p>
+        <div className="bg-app min-h-screen flex items-center justify-center p-4" ref={containerRef}>
+            <div className="surface-card p-12 relative z-10 w-full max-w-md reg-item" style={{ padding: '3rem' }}>
+                <div className="text-center mb-8">
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem', display: 'inline-block' }}>⚗️</div>
+                    <h1 className="text-2xl mb-2">New Operator</h1>
+                    <p className="text-secondary text-sm">Initialize new workspace profile</p>
                 </div>
 
-                <form onSubmit={handleSubmit} style={styles.form}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     {error && (
-                        <div style={styles.errorAlert}>
-                            {error}
+                        <div className="p-3 mb-4" style={{ background: 'rgba(255, 71, 87, 0.1)', border: '1px solid var(--color-error)', color: 'var(--color-error)' }}>
+                            <span className="text-mono">ERR: {error}</span>
                         </div>
                     )}
 
-                    <div className="form-group">
-                        <label htmlFor="username" className="form-label">Username</label>
+                    <div className="reg-item">
+                        <label className="text-label mb-2 block">Operator ID (Username)</label>
                         <input
                             type="text"
-                            id="username"
-                            name="username"
-                            className="form-input"
+                            className="input-tech"
                             value={formData.username}
-                            onChange={handleChange}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                             required
-                            placeholder="Choose a username"
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="email" className="form-label">Email</label>
+                    <div className="reg-item">
+                        <label className="text-label mb-2 block">Comms Channel (Email)</label>
                         <input
                             type="email"
-                            id="email"
-                            name="email"
-                            className="form-input"
+                            className="input-tech"
                             value={formData.email}
-                            onChange={handleChange}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             required
-                            placeholder="your.email@example.com"
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password" className="form-label">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            className="form-input"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            placeholder="At least 6 characters"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            className="form-input"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                            placeholder="Re-enter your password"
-                        />
+                    <div className="grid-cols-2 gap-4" style={{ display: 'grid', gap: '1rem' }}>
+                        <div className="reg-item">
+                            <label className="text-label mb-2 block">Security Key</label>
+                            <input
+                                type="password"
+                                className="input-tech"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="reg-item">
+                            <label className="text-label mb-2 block">Confirm Key</label>
+                            <input
+                                type="password"
+                                className="input-tech"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                required
+                            />
+                        </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="btn btn-primary"
-                        style={styles.submitBtn}
+                        className="btn-tech btn-primary mt-4 reg-item"
                         disabled={loading}
+                        style={{ width: '100%' }}
                     >
-                        {loading ? (
-                            <span style={styles.loadingText}>
-                                <div className="spinner" style={styles.spinner}></div>
-                                Creating account...
-                            </span>
-                        ) : (
-                            'Create Account'
-                        )}
+                        {loading ? 'INITIALIZING...' : 'CREATE PROFILE'}
                     </button>
                 </form>
 
-                <div style={styles.footer}>
-                    <p style={styles.footerText}>
-                        Already have an account?{' '}
-                        <Link to="/login" style={styles.link}>
-                            Sign in here
+                <div className="mt-8 text-center border-t border-tech pt-6 reg-item" style={{ borderColor: 'var(--border-subtle)' }}>
+                    <p className="text-secondary text-sm">
+                        Existing operator?{' '}
+                        <Link to="/login" className="text-accent hover:underline" style={{ color: 'var(--color-accent)' }}>
+                            Sign In
                         </Link>
                     </p>
-                </div>
-
-                <div style={styles.backLink}>
-                    <Link to="/" style={styles.link}>
-                        ← Back to Home
-                    </Link>
                 </div>
             </div>
         </div>
     );
 }
-
-const styles = {
-    pageContainer: {
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
-    },
-    registerContainer: {
-        width: '100%',
-        maxWidth: '450px',
-        padding: '3rem',
-    },
-    logoContainer: {
-        textAlign: 'center',
-        marginBottom: '2rem',
-    },
-    logo: {
-        fontSize: '4rem',
-        marginBottom: '1rem',
-    },
-    title: {
-        fontSize: '2rem',
-        marginBottom: '0.5rem',
-    },
-    subtitle: {
-        color: 'var(--color-text-muted)',
-        fontSize: '1rem',
-    },
-    form: {
-        marginBottom: '1.5rem',
-    },
-    errorAlert: {
-        background: 'rgba(239, 68, 68, 0.1)',
-        border: '1px solid rgba(239, 68, 68, 0.3)',
-        borderRadius: 'var(--radius-md)',
-        padding: '1rem',
-        marginBottom: '1.5rem',
-        color: '#fca5a5',
-        fontSize: '0.875rem',
-    },
-    submitBtn: {
-        width: '100%',
-        marginTop: '1rem',
-    },
-    loadingText: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-    },
-    spinner: {
-        width: '20px',
-        height: '20px',
-        borderWidth: '2px',
-    },
-    footer: {
-        textAlign: 'center',
-        paddingTop: '1.5rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    footerText: {
-        color: 'var(--color-text-muted)',
-        fontSize: '0.875rem',
-    },
-    link: {
-        color: 'var(--color-accent-primary)',
-        fontWeight: 600,
-        transition: 'color var(--transition-fast)',
-    },
-    backLink: {
-        textAlign: 'center',
-        marginTop: '1rem',
-    },
-};
-
-export default RegisterPage;

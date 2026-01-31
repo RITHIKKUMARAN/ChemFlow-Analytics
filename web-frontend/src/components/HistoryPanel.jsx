@@ -1,132 +1,71 @@
-/**
- * History Panel Component - Shows last 5 datasets
- */
-import { useEffect } from 'react';
 import gsap from 'gsap';
+import { useEffect, useRef } from 'react';
 
-function HistoryPanel({ history, onSelectDataset, currentDatasetId }) {
+export default function HistoryPanel({ history, onSelectDataset, currentDatasetId }) {
+    const listRef = useRef(null);
+
     useEffect(() => {
-        gsap.from('.history-item', {
-            opacity: 0,
-            x: 20,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: 'power2.out',
-        });
+        if (history.length) {
+            gsap.from(listRef.current.children, {
+                opacity: 0,
+                x: -10,
+                duration: 0.4,
+                stagger: 0.05
+            });
+        }
     }, [history]);
 
-    if (!history || history.length === 0) {
-        return (
-            <div className="glass" style={styles.container}>
-                <h3 style={styles.title}>📜 Upload History</h3>
-                <p style={styles.emptyText}>No upload history yet</p>
-            </div>
-        );
-    }
-
-    const formatDate = (timestamp) => {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
     return (
-        <div className="glass" style={styles.container}>
-            <h3 style={styles.title}>📜 Upload History</h3>
-            <p style={styles.subtitle}>Last {history.length} datasets</p>
+        <div className="surface-card flex flex-col" style={{ height: '100%', maxHeight: '600px' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-subtle)' }}>
+                <h3 style={{ fontSize: '1rem' }}>Dataset Logs</h3>
+                <div className="text-label text-secondary">RECENT UPLOADS</div>
+            </div>
 
-            <div style={styles.historyList}>
-                {history.map((dataset, index) => (
-                    <div
-                        key={dataset.id}
-                        className="history-item glass-hover"
-                        style={{
-                            ...styles.historyItem,
-                            ...(dataset.id === currentDatasetId ? styles.historyItemActive : {}),
-                        }}
-                        onClick={() => onSelectDataset(dataset.id)}
-                    >
-                        <div style={styles.historyIcon}>
-                            {index === 0 ? '🆕' : '📊'}
+            <div className="overflow-auto custom-scrollbar" style={{ flexGrow: 1, padding: '0.5rem' }}>
+                <ul ref={listRef} className="flex flex-col gap-1">
+                    {history.map((dataset) => {
+                        const isActive = dataset.id === currentDatasetId;
+                        return (
+                            <li
+                                key={dataset.id}
+                                onClick={() => onSelectDataset(dataset.id)}
+                                style={{
+                                    padding: '12px 16px',
+                                    borderRadius: 'var(--radius-sm)',
+                                    cursor: 'pointer',
+                                    background: isActive ? 'var(--bg-surface-hover)' : 'transparent',
+                                    border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                className="hover:bg-active"
+                            >
+                                <div className="text-secondary text-mono" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
+                                    {new Date(dataset.upload_timestamp).toLocaleDateString()}
+                                </div>
+                                <div style={{
+                                    fontFamily: 'var(--font-heading)',
+                                    color: isActive ? 'var(--color-accent)' : 'inherit',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}>
+                                    {dataset.filename}
+                                </div>
+                                <div className="flex justify-between mt-2">
+                                    <span className="text-label">ID: {dataset.id}</span>
+                                    <span className="text-label">{dataset.total_equipment_count} ITEMS</span>
+                                </div>
+                            </li>
+                        );
+                    })}
+                    {history.length === 0 && (
+                        <div className="text-secondary text-center p-4 text-sm">
+                            No logs found.
                         </div>
-                        <div style={styles.historyContent}>
-                            <p style={styles.historyFilename}>{dataset.filename}</p>
-                            <p style={styles.historyDate}>{formatDate(dataset.upload_timestamp)}</p>
-                            <p style={styles.historyCount}>
-                                {dataset.total_equipment_count} equipment
-                            </p>
-                        </div>
-                    </div>
-                ))}
+                    )}
+                </ul>
             </div>
         </div>
     );
 }
-
-const styles = {
-    container: {
-        padding: '1.5rem',
-    },
-    title: {
-        fontSize: '1.25rem',
-        marginBottom: '0.5rem',
-    },
-    subtitle: {
-        fontSize: '0.875rem',
-        color: 'var(--color-text-muted)',
-        marginBottom: '1.5rem',
-    },
-    emptyText: {
-        color: 'var(--color-text-muted)',
-        textAlign: 'center',
-        padding: '2rem 0',
-    },
-    historyList: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-    },
-    historyItem: {
-        display: 'flex',
-        gap: '1rem',
-        padding: '1rem',
-        borderRadius: 'var(--radius-md)',
-        cursor: 'pointer',
-        transition: 'all var(--transition-base)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-    },
-    historyItemActive: {
-        borderColor: 'var(--color-accent-primary)',
-        background: 'rgba(59, 130, 246, 0.1)',
-    },
-    historyIcon: {
-        fontSize: '2rem',
-        flexShrink: 0,
-    },
-    historyContent: {
-        flex: 1,
-    },
-    historyFilename: {
-        fontSize: '0.95rem',
-        fontWeight: 600,
-        color: 'var(--color-text-primary)',
-        marginBottom: '0.25rem',
-        wordBreak: 'break-word',
-    },
-    historyDate: {
-        fontSize: '0.75rem',
-        color: 'var(--color-text-muted)',
-        marginBottom: '0.25rem',
-    },
-    historyCount: {
-        fontSize: '0.75rem',
-        color: 'var(--color-accent-primary)',
-    },
-};
-
-export default HistoryPanel;

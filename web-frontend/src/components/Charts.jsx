@@ -1,6 +1,3 @@
-/**
- * Interactive Charts Component with Chart.js and GSAP
- */
 import { useEffect, useRef } from 'react';
 import {
     Chart as ChartJS,
@@ -29,14 +26,12 @@ ChartJS.register(
     Legend
 );
 
-function Charts({ statistics, equipmentData }) {
-    const chartsRef = useRef(null);
-
+export default function Charts({ statistics, equipmentData }) {
     useEffect(() => {
         // Animate charts on mount
-        gsap.from('.chart-card', {
+        gsap.from('.chart-panel', {
             opacity: 0,
-            y: 50,
+            y: 20,
             duration: 0.8,
             stagger: 0.2,
             ease: 'power3.out',
@@ -45,38 +40,38 @@ function Charts({ statistics, equipmentData }) {
 
     if (!statistics || !equipmentData) {
         return (
-            <div style={styles.emptyState}>
-                <p>Upload a CSV file to see visualizations</p>
+            <div className="text-center p-12 text-secondary text-mono">
+                AWAITING_DATA_STREAM...
             </div>
         );
     }
 
+    const themeColors = {
+        accent: '#4F8CFF',
+        success: '#2ED573',
+        warning: '#FFA502',
+        error: '#FF4757',
+        text: '#EAEAF0',
+        grid: 'rgba(255, 255, 255, 0.05)',
+        tooltipBg: 'rgba(21, 26, 33, 0.95)'
+    };
+
     // Equipment Type Distribution (Pie Chart)
     const pieData = {
         labels: Object.keys(statistics.equipment_type_distribution),
-        datasets: [
-            {
-                label: 'Equipment Count',
-                data: Object.values(statistics.equipment_type_distribution),
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(236, 72, 153, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                ],
-                borderColor: [
-                    'rgba(59, 130, 246, 1)',
-                    'rgba(139, 92, 246, 1)',
-                    'rgba(236, 72, 153, 1)',
-                    'rgba(16, 185, 129, 1)',
-                    'rgba(245, 158, 11, 1)',
-                    'rgba(239, 68, 68, 1)',
-                ],
-                borderWidth: 2,
-            },
-        ],
+        datasets: [{
+            label: 'Count',
+            data: Object.values(statistics.equipment_type_distribution),
+            backgroundColor: [
+                themeColors.accent,
+                themeColors.success,
+                themeColors.warning,
+                themeColors.error,
+                '#70A1FF',
+                '#A4B0BE'
+            ],
+            borderWidth: 0,
+        }],
     };
 
     // Flowrate vs Pressure (Bar Chart)
@@ -96,18 +91,16 @@ function Charts({ statistics, equipmentData }) {
         labels: equipmentTypes,
         datasets: [
             {
-                label: 'Average Flowrate',
+                label: 'Avg Flowrate',
                 data: avgFlowrateByType,
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 2,
+                backgroundColor: themeColors.accent,
+                borderRadius: 4,
             },
             {
-                label: 'Average Pressure',
+                label: 'Avg Pressure',
                 data: avgPressureByType,
-                backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                borderColor: 'rgba(139, 92, 246, 1)',
-                borderWidth: 2,
+                backgroundColor: themeColors.success,
+                borderRadius: 4,
             },
         ],
     };
@@ -115,166 +108,72 @@ function Charts({ statistics, equipmentData }) {
     // Temperature Trend (Line Chart)
     const lineData = {
         labels: equipmentData.map((eq, idx) => idx + 1),
-        datasets: [
-            {
-                label: 'Temperature',
-                data: equipmentData.map(eq => eq.temperature),
-                borderColor: 'rgba(236, 72, 153, 1)',
-                backgroundColor: 'rgba(236, 72, 153, 0.1)',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: 'rgba(236, 72, 153, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-            },
-        ],
+        datasets: [{
+            label: 'Temperature',
+            data: equipmentData.map(eq => eq.temperature),
+            borderColor: themeColors.error,
+            backgroundColor: 'rgba(255, 71, 87, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: themeColors.error,
+            pointRadius: 2,
+            fill: true
+        }],
     };
 
-    const chartOptions = {
+    const commonOptions = {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
-                labels: {
-                    color: '#f9fafb',
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif",
-                    },
-                },
+                labels: { color: themeColors.text, font: { family: "'Inter', sans-serif", size: 11 } },
+                position: 'bottom'
             },
             tooltip: {
-                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                titleColor: '#f9fafb',
-                bodyColor: '#d1d5db',
-                borderColor: 'rgba(59, 130, 246, 0.3)',
+                backgroundColor: themeColors.tooltipBg,
+                titleColor: themeColors.text,
+                bodyColor: themeColors.text,
+                borderColor: 'rgba(255,255,255,0.1)',
                 borderWidth: 1,
-                padding: 12,
-                displayColors: true,
+                padding: 10,
+                titleFont: { family: "'Space Grotesk', sans-serif" },
+                bodyFont: { family: "'JetBrains Mono', monospace" }
             },
         },
         scales: {
             x: {
-                ticks: {
-                    color: '#9ca3af',
-                    font: {
-                        size: 11,
-                    },
-                },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.05)',
-                },
+                grid: { color: themeColors.grid },
+                ticks: { color: themeColors.text, font: { size: 10 } }
             },
             y: {
-                ticks: {
-                    color: '#9ca3af',
-                    font: {
-                        size: 11,
-                    },
-                },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.05)',
-                },
-            },
-        },
-    };
-
-    const pieOptions = {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                position: 'right',
-                labels: {
-                    color: '#f9fafb',
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif",
-                    },
-                    padding: 15,
-                },
-            },
-            tooltip: {
-                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                titleColor: '#f9fafb',
-                bodyColor: '#d1d5db',
-                borderColor: 'rgba(59, 130, 246, 0.3)',
-                borderWidth: 1,
-                padding: 12,
-            },
-        },
+                grid: { color: themeColors.grid },
+                ticks: { color: themeColors.text, font: { size: 10 } }
+            }
+        }
     };
 
     return (
-        <div ref={chartsRef} style={styles.chartsContainer}>
-            <h3 style={styles.title}>📊 Data Visualizations</h3>
-
-            <div style={styles.chartsGrid}>
-                {/* Equipment Type Distribution */}
-                <div className="chart-card glass" style={styles.chartCard}>
-                    <h4 style={styles.chartTitle}>Equipment Type Distribution</h4>
-                    <div style={styles.chartWrapper}>
-                        <Pie data={pieData} options={pieOptions} />
-                    </div>
+        <div className="grid-cols-2" style={{ gap: '1.5rem' }}>
+            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: 'span 1' }}>
+                <h4 className="text-label mb-4">TYPE DISTRIBUTION</h4>
+                <div style={{ height: '250px' }}>
+                    <Pie data={pieData} options={{ ...commonOptions, maintainAspectRatio: false }} />
                 </div>
+            </div>
 
-                {/* Flowrate vs Pressure */}
-                <div className="chart-card glass" style={styles.chartCard}>
-                    <h4 style={styles.chartTitle}>Average Flowrate & Pressure by Type</h4>
-                    <div style={styles.chartWrapper}>
-                        <Bar data={barData} options={chartOptions} />
-                    </div>
+            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: 'span 1' }}>
+                <h4 className="text-label mb-4">FLOW vs PRESSURE</h4>
+                <div style={{ height: '250px' }}>
+                    <Bar data={barData} options={commonOptions} />
                 </div>
+            </div>
 
-                {/* Temperature Trend */}
-                <div className="chart-card glass" style={styles.chartCardWide}>
-                    <h4 style={styles.chartTitle}>Temperature Trend Across Equipment</h4>
-                    <div style={styles.chartWrapper}>
-                        <Line data={lineData} options={chartOptions} />
-                    </div>
+            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: '1 / -1' }}>
+                <h4 className="text-label mb-4">TEMPERATURE GRADIENT</h4>
+                <div style={{ height: '300px' }}>
+                    <Line data={lineData} options={commonOptions} />
                 </div>
             </div>
         </div>
     );
 }
-
-const styles = {
-    chartsContainer: {
-        marginTop: '2rem',
-    },
-    title: {
-        fontSize: '1.5rem',
-        marginBottom: '1.5rem',
-    },
-    chartsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: '2rem',
-    },
-    chartCard: {
-        padding: '1.5rem',
-    },
-    chartCardWide: {
-        padding: '1.5rem',
-        gridColumn: '1 / -1',
-    },
-    chartTitle: {
-        fontSize: '1.125rem',
-        marginBottom: '1rem',
-        color: 'var(--color-text-primary)',
-    },
-    chartWrapper: {
-        position: 'relative',
-        height: '300px',
-    },
-    emptyState: {
-        textAlign: 'center',
-        padding: '3rem',
-        color: 'var(--color-text-muted)',
-    },
-};
-
-export default Charts;

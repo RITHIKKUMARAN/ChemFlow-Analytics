@@ -1,272 +1,226 @@
-/**
- * ChemFlow Analytics - Modern Landing Page
- * Heavy GSAP integration for premium feel
- */
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Navbar from '../components/layout/Navbar';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function LandingPage() {
+export default function LandingPage() {
     const navigate = useNavigate();
     const heroRef = useRef(null);
-    const contentRef = useRef(null);
-    const cursorRef = useRef(null);
+    const gridRef = useRef(null);
 
     useEffect(() => {
-        // Custom Cursor Logic
-        const moveCursor = (e) => {
-            gsap.to(cursorRef.current, {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.2,
-                ease: 'power2.out'
-            });
-        };
-        window.addEventListener('mousemove', moveCursor);
+        const ctx = gsap.context(() => {
+            // 1. Initial Reveal
+            const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-        // Hero Entrance Animation
-        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-
-        tl.from('.hero-badge', {
-            y: -50,
-            opacity: 0,
-            duration: 1,
-            delay: 0.5
-        })
-            .from('.hero-title-line', {
-                y: 100,
+            tl.from('.hero-word', {
+                y: 120,
                 opacity: 0,
+                duration: 1.4,
                 stagger: 0.15,
-                duration: 1.2,
-                skewY: 5
-            }, '-=0.5')
-            .from('.hero-desc', {
-                y: 30,
-                opacity: 0,
-                duration: 1
-            }, '-=0.8')
-            .from('.hero-btn', {
-                y: 20,
-                opacity: 0,
-                stagger: 0.1,
-                duration: 0.8
-            }, '-=0.6')
-            .from('.visual-element', {
-                scale: 0.8,
-                opacity: 0,
-                duration: 1.5,
-                ease: 'back.out(1.7)'
-            }, '-=1');
+                skewY: 5,
+                delay: 0.2
+            })
+                .from('.hero-sub', {
+                    y: 20,
+                    opacity: 0,
+                    duration: 1
+                }, '-=1')
+                .from('.hero-cta', {
+                    y: 20,
+                    opacity: 0,
+                    stagger: 0.1,
+                    duration: 0.8
+                }, '-=0.8');
 
-        // Scroll Animations for Feature System
-        const cards = gsap.utils.toArray('.feature-box');
-        cards.forEach((card, i) => {
-            gsap.from(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: 'top 85%',
-                    toggleActions: 'play none none reverse'
-                },
-                y: 100,
-                opacity: 0,
-                duration: 0.8,
-                delay: i * 0.1
+            // 2. Animated Background Grid using Canvas or simple div lines
+            gsap.to(gridRef.current, {
+                backgroundPosition: '0px 100px',
+                duration: 20,
+                ease: 'none',
+                repeat: -1
             });
-        });
 
-        // Parallax Background
-        gsap.to('.hero-bg-glow', {
-            scrollTrigger: {
-                trigger: '.hero-section',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: 1
-            },
-            y: 200,
-            opacity: 0
-        });
+            // 3. Scroll Features
+            const cards = gsap.utils.toArray('.feature-card');
+            cards.forEach((card, i) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    y: 60,
+                    opacity: 0,
+                    duration: 0.8,
+                    delay: i * 0.1
+                });
+            });
 
-        return () => {
-            window.removeEventListener('mousemove', moveCursor);
-            ScrollTrigger.getAll().forEach(t => t.kill());
-        };
+        }, heroRef);
+
+        return () => ctx.revert();
     }, []);
 
     const features = [
-        { icon: '📊', title: 'Data Visualization', desc: 'Transform raw numbers into stunning interactive charts.' },
-        { icon: '⚡', title: 'Real-time Analytics', desc: 'Instant parameter processing with sub-millisecond latency.' },
-        { icon: '🔒', title: 'Enterprise Security', desc: 'Bank-grade JWT encryption for your sensitive data.' },
-        { icon: '📄', title: 'Smart Reporting', desc: 'Automated PDF generation with deep insights.' },
-        { icon: '🌍', title: 'Hybrid Architecture', desc: 'Seamlessly sync between Web and Desktop apps.' },
-        { icon: '🎨', title: 'Modern UI/UX', desc: 'Designed for clarity, efficiency, and aesthetics.' }
+        {
+            label: 'INGESTION',
+            title: 'High-Velocity CSV Parsing',
+            desc: 'Process heavy datasets with sub-millisecond latency. Automated type inference and error handling included.',
+            mono: 'Pandas Engine v2.1'
+        },
+        {
+            label: 'VISUALIZATION',
+            title: 'Reactive Charting Engine',
+            desc: 'Interactive, GPU-accelerated plotting for flow rates, pressure dynamics, and thermal gradients.',
+            mono: '60 FPS Rendering'
+        },
+        {
+            label: 'REPORTING',
+            title: 'Automated PDF Generation',
+            desc: 'Generate compliance-ready technical reports with one click. Vector-perfect output.',
+            mono: 'PDF/A-3 Standard'
+        }
     ];
 
     return (
-        <div className="landing-wrapper" ref={contentRef} style={{ overflowX: 'hidden' }}>
-            {/* Custom Cursor */}
-            <div ref={cursorRef} style={{
+        <div className="bg-app min-h-screen text-primary overflow-hidden" ref={heroRef}>
+            <Navbar />
+
+            {/* BACKGROUND GRID */}
+            <div ref={gridRef} style={{
                 position: 'fixed',
-                width: '20px',
-                height: '20px',
-                background: 'var(--primary)',
-                borderRadius: '50%',
-                pointerEvents: 'none',
-                zIndex: 9999,
-                mixBlendMode: 'difference',
-                transform: 'translate(-50%, -50%)',
-                filter: 'blur(4px)'
+                inset: 0,
+                zIndex: 0,
+                backgroundImage: `linear-gradient(var(--border-subtle) 1px, transparent 1px),
+                         linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)`,
+                backgroundSize: '40px 40px',
+                maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+                opacity: 0.4
             }} />
 
-            {/* Navbar */}
-            <nav style={{
-                position: 'fixed',
-                top: 0,
-                width: '100%',
-                padding: '20px 40px',
-                zIndex: 100,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'rgba(3, 0, 20, 0.5)',
-                backdropFilter: 'blur(10px)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '24px' }}>⚗️</span>
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px' }}>ChemFlow</span>
-                </div>
-                <button
-                    className="btn-modern btn-secondary"
-                    onClick={() => navigate('/login')}
-                >
-                    Login Portal
-                </button>
-            </nav>
-
-            {/* Hero Section */}
-            <section className="hero-section" ref={heroRef} style={{
-                position: 'relative',
+            {/* HERO SECTION */}
+            <section style={{
                 minHeight: '100vh',
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'column',
                 justifyContent: 'center',
                 paddingTop: '80px',
+                position: 'relative',
                 zIndex: 1
             }}>
-                {/* Background FX - Pushed clearly to back */}
-                <div className="hero-bg-glow glow-orb" style={{ position: 'absolute', top: '-20%', left: '20%', zIndex: -1 }} />
-                <div className="hero-bg-glow glow-orb" style={{ position: 'absolute', bottom: '-20%', right: '10%', background: 'radial-gradient(circle, var(--secondary-glow) 0%, transparent 70%)', zIndex: -1 }} />
-
-                <div className="container" style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
-
-                    <div className="hero-badge" style={{
-                        display: 'inline-block',
-                        padding: '8px 16px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '30px',
-                        marginBottom: '30px',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '14px',
-                        letterSpacing: '1px'
-                    }}>
-                        ✨ NEXT GENERATION ANALYTICS
+                <div className="container">
+                    <div className="overflow-hidden">
+                        <h1 className="hero-word" style={{
+                            fontSize: 'clamp(3rem, 7vw, 6rem)',
+                            lineHeight: 1,
+                            marginBottom: '1rem',
+                            fontWeight: 600
+                        }}>
+                            Industrial Grade
+                        </h1>
+                    </div>
+                    <div className="overflow-hidden">
+                        <h1 className="hero-word text-secondary" style={{
+                            fontSize: 'clamp(3rem, 7vw, 6rem)',
+                            lineHeight: 1,
+                            fontWeight: 600
+                        }}>
+                            Parameter Analytics
+                        </h1>
                     </div>
 
-                    <h1 style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', lineHeight: 1.1, marginBottom: '24px' }}>
-                        <div className="hero-title-line">Master Your</div>
-                        <div className="hero-title-line text-gradient">Equipment Data</div>
-                    </h1>
-
-                    <p className="hero-desc" style={{
+                    <p className="hero-sub text-secondary" style={{
                         maxWidth: '600px',
-                        margin: '0 auto 40px',
-                        fontSize: '1.2rem',
-                        color: '#a0a0b0'
+                        marginTop: '2rem',
+                        fontSize: '1.125rem',
+                        lineHeight: 1.6
                     }}>
-                        Upload, analyze, and visualize chemical parameters with an interface designed for the future of engineering.
+                        Advanced visualization platform for chemical equipment monitoring.
+                        Real-time data ingestion, precision charting, and automated compliance reporting.
                     </p>
 
-                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                    <div className="flex gap-4" style={{ marginTop: '3rem' }}>
                         <button
-                            className="hero-btn btn-modern btn-primary"
+                            className="hero-cta btn-tech btn-primary"
                             onClick={() => navigate('/register')}
                         >
-                            Get Started Free
+                            Start Console
                         </button>
                         <button
-                            className="hero-btn btn-modern btn-secondary"
-                            onClick={() => {
-                                document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
-                            }}
+                            className="hero-cta btn-tech btn-secondary"
+                            onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
                         >
-                            Explore Features
+                            System Specs
                         </button>
                     </div>
 
-                    {/* Floating Visual Element */}
-                    <div className="visual-element float" style={{
-                        marginTop: '80px',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '20px',
-                        padding: '20px',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                        maxWidth: '800px',
-                        marginLeft: 'auto',
-                        marginRight: 'auto'
+                    {/* METRICS STRIP */}
+                    <div className="hero-cta flex gap-12 border-tech glass-panel" style={{
+                        marginTop: '5rem',
+                        padding: '1.5rem 2rem',
+                        borderRadius: 'var(--radius-lg)',
+                        display: 'inline-flex'
                     }}>
-                        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '20px' }}>
-                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }} />
-                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }} />
-                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }} />
-                        </div>
-                        <div style={{
-                            height: '200px',
-                            background: 'url("https://www.chartjs.org/img/chartjs-logo.svg") no-repeat center center',
-                            opacity: 0.5,
-                            filter: 'grayscale(100%)'
-                        }} />
-                    </div>
-                </div>
-            </section>
-
-            {/* Feature Grid */}
-            <section id="features" style={{ padding: '100px 0', position: 'relative' }}>
-                <div className="container">
-                    <h2 style={{ textAlign: 'center', fontSize: '3rem', marginBottom: '60px' }}>
-                        Designed for <span className="text-gradient">Performance</span>
-                    </h2>
-
-                    <div className="grid-3">
-                        {features.map((item, idx) => (
-                            <div key={idx} className="feature-box glass-card" style={{ padding: '40px' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '20px' }}>{item.icon}</div>
-                                <h3 style={{ marginBottom: '10px', fontSize: '1.5rem' }}>{item.title}</h3>
-                                <p style={{ color: '#a0a0b0' }}>{item.desc}</p>
+                        {[
+                            { label: 'Latency', val: '< 12ms' },
+                            { label: 'Uptime', val: '99.9%' },
+                            { label: 'Security', val: 'AES-256' }
+                        ].map((m, i) => (
+                            <div key={i}>
+                                <div className="text-label" style={{ marginBottom: '4px' }}>{m.label}</div>
+                                <div className="text-mono" style={{ fontSize: '1.1rem', color: 'var(--color-accent)' }}>{m.val}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer style={{
-                background: '#020010',
-                padding: '60px 0',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                textAlign: 'center'
-            }}>
+            {/* FEATURES SECTION */}
+            <section id="features" style={{ padding: '8rem 0', position: 'relative', zIndex: 1 }}>
                 <div className="container">
-                    <h2 style={{ marginBottom: '20px', fontFamily: 'var(--font-display)' }}>ChemFlow Analytics</h2>
-                    <p style={{ color: '#666' }}>&copy; 2026 ChemFlow Analytics. All rights reserved.</p>
+                    <div className="grid-cols-3">
+                        {features.map((f, i) => (
+                            <div
+                                key={i}
+                                className="feature-card surface-card"
+                                style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', height: '100%' }}
+                            >
+                                <div className="text-label mb-4" style={{ color: 'var(--color-accent)' }}>0{i + 1} // {f.label}</div>
+                                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', lineHeight: 1.3 }}>{f.title}</h3>
+                                <p className="text-secondary" style={{ flexGrow: 1, marginBottom: '2rem' }}>{f.desc}</p>
+                                <div className="text-mono text-xs" style={{
+                                    padding: '8px 12px',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    borderRadius: '4px',
+                                    display: 'inline-block',
+                                    color: 'var(--color-text-tertiary)'
+                                }}>
+                                    {f.mono}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </footer>
+            </section>
+
+            {/* FINAL CTA */}
+            <section style={{ padding: '6rem 0', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                <div className="container">
+                    <h2 style={{ fontSize: '3rem', marginBottom: '2rem' }}>Ready to deploy?</h2>
+                    <button
+                        className="btn-tech btn-primary"
+                        style={{ padding: '0 40px', height: '56px', fontSize: '1.1rem' }}
+                        onClick={() => navigate('/register')}
+                    >
+                        Initialize Workspace
+                    </button>
+                </div>
+            </section>
         </div>
     );
 }
-
-export default LandingPage;
