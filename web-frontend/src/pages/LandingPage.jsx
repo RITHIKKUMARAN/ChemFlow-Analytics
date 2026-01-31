@@ -145,7 +145,7 @@ function LandingPage() {
                     </div>
 
                     <h1 className="hero-title text-gradient" style={styles.heroTitle}>
-                        Chemical Equipment<br />Parameter Visualizer
+                        ChemFlow<br />Analytics
                     </h1>
 
                     <p className="hero-subtitle" style={styles.heroSubtitle}>
@@ -219,7 +219,7 @@ function LandingPage() {
             <footer style={styles.footer}>
                 <div className="container text-center">
                     <p style={styles.footerText}>
-                        © 2026 Chemical Equipment Visualizer | Hybrid Application
+                        © 2026 ChemFlow Analytics | Hybrid Application
                     </p>
                 </div>
             </footer>

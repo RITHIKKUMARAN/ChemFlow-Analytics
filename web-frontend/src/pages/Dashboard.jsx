@@ -124,7 +124,7 @@ function Dashboard() {
                 <div className="container" style={styles.headerContainer}>
                     <div style={styles.logo}>
                         <span style={styles.logoIcon}>⚗️</span>
-                        <h1 style={styles.logoText}>Chemical Equipment Visualizer</h1>
+                        <h1 style={styles.logoText}>ChemFlow Analytics</h1>
                     </div>
                     <div style={styles.headerActions}>
                         {statistics && (

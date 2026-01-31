@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize UI"""
-        self.setWindowTitle('Chemical Equipment Visualizer - Dashboard')
+        self.setWindowTitle('ChemFlow Analytics - Dashboard')
         self.setGeometry(100, 100, 1400, 900)
         
         self.setStyleSheet("""
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
         logo_font.setPointSize(24)
         logo.setFont(logo_font)
         
-        title = QLabel('Chemical Equipment Visualizer')
+        title = QLabel('ChemFlow Analytics')
         title_font = QFont()
         title_font.setPointSize(18)
         title_font.setBold(True)

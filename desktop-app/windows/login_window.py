@@ -21,7 +21,7 @@ class LoginWindow(QWidget):
     
     def init_ui(self):
         """Initialize UI"""
-        self.setWindowTitle('Chemical Equipment Visualizer - Login')
+        self.setWindowTitle('ChemFlow Analytics - Login')
         self.setFixedSize(450, 550)
         self.setStyleSheet("""
             QWidget {

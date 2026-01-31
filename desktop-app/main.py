@@ -1,5 +1,5 @@
 """
-Chemical Equipment Visualizer - Desktop Application
+ChemFlow Analytics - Desktop Application
 Main entry point for PyQt5 desktop app
 """
 import sys
@@ -13,8 +13,8 @@ from windows.main_window import MainWindow
 def main():
     """Main application entry point"""
     app = QApplication(sys.argv)
-    app.setApplicationName('Chemical Equipment Visualizer')
-    app.setOrganizationName('Chemical Equipment Visualizer')
+    app.setApplicationName('ChemFlow Analytics')
+    app.setOrganizationName('ChemFlow Analytics')
     
     # Create API client
     api_client = APIClient()
