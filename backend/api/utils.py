@@ -3,38 +3,75 @@ Utility functions for CSV parsing, statistics computation, and PDF generation
 """
 import pandas as pd
 from io import BytesIO
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from django.db.models import Avg, Count
+from django.utils.timezone import localtime
 from .models import Equipment
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-
-def parse_csv_file(csv_file):
+def parse_csv_file(file_obj):
     """
-    Parse uploaded CSV file using Pandas
+    Parse uploaded file (CSV or Excel) using Pandas
     
     Args:
-        csv_file: Django UploadedFile object
+        file_obj: Django UploadedFile object
         
     Returns:
         tuple: (success: bool, data: DataFrame or error_message: str)
     """
     try:
-        # Read CSV using pandas
-        df = pd.read_csv(csv_file)
+        filename = file_obj.name.lower()
+        df = None
         
-        # Validate required columns
+        if filename.endswith(('.xls', '.xlsx')):
+            try:
+                df = pd.read_excel(file_obj)
+            except Exception as e:
+                return False, f"Error reading Excel file: {str(e)}"
+        else:
+            # Try different encodings for CSV
+            encodings = ['utf-8', 'latin-1', 'cp1252', 'ISO-8859-1']
+            for encoding in encodings:
+                try:
+                    file_obj.seek(0)
+                    df = pd.read_csv(file_obj, encoding=encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            
+            if df is None:
+                return False, "Failed to decode CSV file. Please check file encoding."
+
         # Map sample data headers to model fields
+        # Normalize column names to title case to match potential inputs like "equipment name" -> "Equipment Name"
+        df.columns = [c.strip() for c in df.columns]
+        
+        # Smart column mapping
         column_mapping = {
             'Equipment Name': 'Equipment_ID',
-            'Type': 'Equipment_Type'
+            'Equipment Name': 'Equipment_ID', # Duplicate for safety
+            'Name': 'Equipment_ID',
+            'ID': 'Equipment_ID',
+            'Type': 'Equipment_Type',
+            'Category': 'Equipment_Type',
+            'Flow': 'Flowrate',
+            'Flow Rate': 'Flowrate',
+            'Temp': 'Temperature',
+            'Temp.': 'Temperature',
+            'Press': 'Pressure',
+            'Press.': 'Pressure'
         }
+        
         df = df.rename(columns=column_mapping)
-
+        
         required_columns = ['Equipment_ID', 'Equipment_Type', 'Flowrate', 'Pressure', 'Temperature']
         missing_columns = [col for col in required_columns if col not in df.columns]
         
@@ -43,7 +80,7 @@ def parse_csv_file(csv_file):
         
         # Check for empty dataframe
         if df.empty:
-            return False, "CSV file is empty"
+            return False, "File is empty"
         
         # Clean data - remove rows with NaN values
         df = df.dropna(subset=required_columns)
@@ -62,11 +99,9 @@ def parse_csv_file(csv_file):
         return True, df
         
     except pd.errors.EmptyDataError:
-        return False, "CSV file is empty"
-    except pd.errors.ParserError as e:
-        return False, f"CSV parsing error: {str(e)}"
+        return False, "File is empty"
     except Exception as e:
-        return False, f"Error reading CSV: {str(e)}"
+        return False, f"Error reading file: {str(e)}"
 
 
 def compute_statistics(dataset_id):
@@ -104,9 +139,51 @@ def compute_statistics(dataset_id):
     }
 
 
+def generate_chart_image(dataset_id, chart_type='distribution'):
+    """Generate chart and return as BytesIO"""
+    plt.figure(figsize=(7, 4))
+    
+    # Fetch data
+    equipment = Equipment.objects.filter(dataset_id=dataset_id)
+    df = pd.DataFrame(list(equipment.values()))
+    
+    buf = BytesIO()
+    
+    if chart_type == 'distribution':
+        sns.set_style("darkgrid")
+        ax = sns.countplot(data=df, x='equipment_type', palette='viridis')
+        plt.title('Equipment Distribution', fontsize=14, pad=10)
+        plt.xlabel('Equipment Type')
+        plt.ylabel('Count')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        
+    elif chart_type == 'parameters':
+        fig, axes = plt.subplots(1, 3, figsize=(8, 4))
+        sns.set_style("whitegrid")
+        
+        sns.boxplot(y=df['flowrate'], ax=axes[0], color='#4F8CFF')
+        axes[0].set_title('Flowrate (m³/h)')
+        axes[0].set_ylabel('')
+        
+        sns.boxplot(y=df['pressure'], ax=axes[1], color='#2ED573')
+        axes[1].set_title('Pressure (Bar)')
+        axes[1].set_ylabel('')
+        
+        sns.boxplot(y=df['temperature'], ax=axes[2], color='#FF4757')
+        axes[2].set_title('Temp (°C)')
+        axes[2].set_ylabel('')
+        
+        plt.tight_layout()
+
+    plt.savefig(buf, format='png', dpi=150)
+    plt.close()
+    buf.seek(0)
+    return buf
+
 def generate_pdf_report(dataset, statistics):
     """
-    Generate PDF report using ReportLab
+    Generate PDF report using ReportLab with Charts
     
     Args:
         dataset: Dataset model instance
@@ -149,7 +226,7 @@ def generate_pdf_report(dataset, statistics):
     dataset_info = [
         ['Dataset Information', ''],
         ['Filename:', dataset.filename],
-        ['Upload Date:', dataset.upload_timestamp.strftime('%Y-%m-%d %H:%M:%S')],
+        ['Upload Date:', localtime(dataset.upload_timestamp).strftime('%Y-%m-%d %H:%M:%S')],
         ['Total Equipment:', str(statistics['total_equipment'])],
     ]
     
@@ -161,7 +238,7 @@ def generate_pdf_report(dataset, statistics):
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 14),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
     ]))
@@ -186,7 +263,7 @@ def generate_pdf_report(dataset, statistics):
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.aliceblue),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 11),
@@ -194,7 +271,7 @@ def generate_pdf_report(dataset, statistics):
     elements.append(summary_table)
     elements.append(Spacer(1, 0.3*inch))
     
-    # Equipment Type Distribution
+    # Equipment Type Distribution Table
     elements.append(Paragraph("Equipment Type Distribution", heading_style))
     
     distribution_data = [['Equipment Type', 'Count']]
@@ -214,6 +291,22 @@ def generate_pdf_report(dataset, statistics):
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.lightgreen, colors.HexColor('#c6f6d5')]),
     ]))
     elements.append(distribution_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # -- CHARTS SECTION --
+    elements.append(PageBreak())
+    elements.append(Paragraph("Visual Analytics", title_style))
+    
+    # 1. Distribution Chart
+    elements.append(Paragraph("Equipment Distribution", heading_style))
+    dist_chart_buf = generate_chart_image(dataset.id, 'distribution')
+    elements.append(Image(dist_chart_buf, width=6*inch, height=3.5*inch))
+    elements.append(Spacer(1, 0.5*inch))
+    
+    # 2. Parameter Distribution Boxplots
+    elements.append(Paragraph("Parameter Variability (Box Plots)", heading_style))
+    param_chart_buf = generate_chart_image(dataset.id, 'parameters')
+    elements.append(Image(param_chart_buf, width=7*inch, height=3.5*inch))
     
     # Footer
     elements.append(Spacer(1, 0.5*inch))

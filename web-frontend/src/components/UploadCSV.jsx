@@ -37,7 +37,7 @@ export default function UploadCSV({ onUploadSuccess }) {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept=".csv"
+                accept=".csv, .xlsx, .xls"
                 className="hidden"
             />
             <button
@@ -56,7 +56,7 @@ export default function UploadCSV({ onUploadSuccess }) {
                     ) : (
                         <>
                             <span>UPLOAD DATASET</span>
-                            <span className="text-xs opacity-60">(.CSV)</span>
+                            <span className="text-xs opacity-60">(.CSV, .XLSX)</span>
                         </>
                     )}
                 </span>

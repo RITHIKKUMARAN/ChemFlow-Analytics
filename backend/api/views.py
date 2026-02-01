@@ -94,9 +94,10 @@ def upload_csv(request):
     csv_file = request.FILES['file']
     
     # Validate file extension
-    if not csv_file.name.endswith('.csv'):
+    allowed_extensions = ['.csv', '.xls', '.xlsx']
+    if not any(csv_file.name.lower().endswith(ext) for ext in allowed_extensions):
         return Response({
-            'error': 'File must be a CSV'
+            'error': 'File must be a CSV or Excel (.xlsx) file'
         }, status=status.HTTP_400_BAD_REQUEST)
     
     # Parse CSV
