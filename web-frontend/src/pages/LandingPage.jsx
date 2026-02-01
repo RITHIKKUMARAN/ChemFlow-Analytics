@@ -1,226 +1,112 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '../hooks/useGSAP';
 import Navbar from '../components/layout/Navbar';
+import Scene from '../components/canvas/Scene';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function LandingPage() {
     const navigate = useNavigate();
-    const heroRef = useRef(null);
-    const gridRef = useRef(null);
+    const mainRef = useRef(null);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // 1. Initial Reveal
-            const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-            tl.from('.hero-word', {
-                y: 120,
-                opacity: 0,
-                duration: 1.4,
-                stagger: 0.15,
-                skewY: 5,
-                delay: 0.2
-            })
-                .from('.hero-sub', {
-                    y: 20,
-                    opacity: 0,
-                    duration: 1
-                }, '-=1')
-                .from('.hero-cta', {
-                    y: 20,
-                    opacity: 0,
-                    stagger: 0.1,
-                    duration: 0.8
-                }, '-=0.8');
+        // 1. Cinematic Intro
+        tl.from('.hero-line', {
+            y: 120,
+            opacity: 0,
+            skewY: 7,
+            duration: 1.8,
+            stagger: 0.15,
+            delay: 0.5
+        })
+            .from('.hero-meta', { opacity: 0, y: 20, duration: 1 }, '-=1')
+            .from('.cta-group', { opacity: 0, scale: 0.9, duration: 1 }, '-=0.8');
 
-            // 2. Animated Background Grid using Canvas or simple div lines
-            gsap.to(gridRef.current, {
-                backgroundPosition: '0px 100px',
-                duration: 20,
-                ease: 'none',
-                repeat: -1
-            });
+        // 2. Scroll-driven Depth
+        gsap.to('.hero-container', {
+            y: -100,
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '.hero-container',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
 
-            // 3. Scroll Features
-            const cards = gsap.utils.toArray('.feature-card');
-            cards.forEach((card, i) => {
-                gsap.from(card, {
-                    scrollTrigger: {
-                        trigger: card,
-                        start: 'top 85%',
-                        toggleActions: 'play none none reverse'
-                    },
-                    y: 60,
-                    opacity: 0,
-                    duration: 0.8,
-                    delay: i * 0.1
-                });
-            });
+        // 3. Feature Pinning
+        const cards = gsap.utils.toArray('.feature-panel');
+        gsap.set(cards, { y: 100, opacity: 0 });
 
-        }, heroRef);
+        ScrollTrigger.batch(cards, {
+            onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, overwrite: true }),
+            start: 'top 85%'
+        });
 
-        return () => ctx.revert();
-    }, []);
-
-    const features = [
-        {
-            label: 'INGESTION',
-            title: 'High-Velocity CSV Parsing',
-            desc: 'Process heavy datasets with sub-millisecond latency. Automated type inference and error handling included.',
-            mono: 'Pandas Engine v2.1'
-        },
-        {
-            label: 'VISUALIZATION',
-            title: 'Reactive Charting Engine',
-            desc: 'Interactive, GPU-accelerated plotting for flow rates, pressure dynamics, and thermal gradients.',
-            mono: '60 FPS Rendering'
-        },
-        {
-            label: 'REPORTING',
-            title: 'Automated PDF Generation',
-            desc: 'Generate compliance-ready technical reports with one click. Vector-perfect output.',
-            mono: 'PDF/A-3 Standard'
-        }
-    ];
+    }, mainRef);
 
     return (
-        <div className="bg-app min-h-screen text-primary overflow-hidden" ref={heroRef}>
+        <div ref={mainRef} className="relative min-h-screen text-white overflow-x-hidden">
+            <Scene /> {/* WebGL Background */}
             <Navbar />
 
-            {/* BACKGROUND GRID */}
-            <div ref={gridRef} style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 0,
-                backgroundImage: `linear-gradient(var(--border-subtle) 1px, transparent 1px),
-                         linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)`,
-                backgroundSize: '40px 40px',
-                maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-                opacity: 0.4
-            }} />
-
             {/* HERO SECTION */}
-            <section style={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                paddingTop: '80px',
-                position: 'relative',
-                zIndex: 1
-            }}>
-                <div className="container">
-                    <div className="overflow-hidden">
-                        <h1 className="hero-word" style={{
-                            fontSize: 'clamp(3rem, 7vw, 6rem)',
-                            lineHeight: 1,
-                            marginBottom: '1rem',
-                            fontWeight: 600
-                        }}>
-                            Industrial Grade
-                        </h1>
-                    </div>
-                    <div className="overflow-hidden">
-                        <h1 className="hero-word text-secondary" style={{
-                            fontSize: 'clamp(3rem, 7vw, 6rem)',
-                            lineHeight: 1,
-                            fontWeight: 600
-                        }}>
-                            Parameter Analytics
-                        </h1>
-                    </div>
+            <section className="hero-container relative h-screen flex flex-col items-center justify-center p-6 text-center z-10">
+                <div className="overflow-hidden mb-2">
+                    <h1 className="hero-line text-[12vh] font-bold leading-none tracking-tighter mix-blend-overlay">
+                        INDUSTRIAL
+                    </h1>
+                </div>
+                <div className="overflow-hidden mb-8">
+                    <h1 className="hero-line text-[12vh] font-bold leading-none tracking-tighter text-accent mix-blend-screen">
+                        INTELLIGENCE
+                    </h1>
+                </div>
 
-                    <p className="hero-sub text-secondary" style={{
-                        maxWidth: '600px',
-                        marginTop: '2rem',
-                        fontSize: '1.125rem',
-                        lineHeight: 1.6
-                    }}>
-                        Advanced visualization platform for chemical equipment monitoring.
-                        Real-time data ingestion, precision charting, and automated compliance reporting.
+                <div className="hero-meta max-w-xl mx-auto mb-12">
+                    <p className="text-lg text-gray-400 font-light leading-relaxed">
+                        Next-generation telemetry visualization for chemical processing units.
+                        GPU-accelerated <span className="text-white font-medium">real-time analytics</span>.
                     </p>
-
-                    <div className="flex gap-4" style={{ marginTop: '3rem' }}>
-                        <button
-                            className="hero-cta btn-tech btn-primary"
-                            onClick={() => navigate('/register')}
-                        >
-                            Start Console
-                        </button>
-                        <button
-                            className="hero-cta btn-tech btn-secondary"
-                            onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
-                        >
-                            System Specs
-                        </button>
-                    </div>
-
-                    {/* METRICS STRIP */}
-                    <div className="hero-cta flex gap-12 border-tech glass-panel" style={{
-                        marginTop: '5rem',
-                        padding: '1.5rem 2rem',
-                        borderRadius: 'var(--radius-lg)',
-                        display: 'inline-flex'
-                    }}>
-                        {[
-                            { label: 'Latency', val: '< 12ms' },
-                            { label: 'Uptime', val: '99.9%' },
-                            { label: 'Security', val: 'AES-256' }
-                        ].map((m, i) => (
-                            <div key={i}>
-                                <div className="text-label" style={{ marginBottom: '4px' }}>{m.label}</div>
-                                <div className="text-mono" style={{ fontSize: '1.1rem', color: 'var(--color-accent)' }}>{m.val}</div>
-                            </div>
-                        ))}
-                    </div>
                 </div>
-            </section>
 
-            {/* FEATURES SECTION */}
-            <section id="features" style={{ padding: '8rem 0', position: 'relative', zIndex: 1 }}>
-                <div className="container">
-                    <div className="grid-cols-3">
-                        {features.map((f, i) => (
-                            <div
-                                key={i}
-                                className="feature-card surface-card"
-                                style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', height: '100%' }}
-                            >
-                                <div className="text-label mb-4" style={{ color: 'var(--color-accent)' }}>0{i + 1} // {f.label}</div>
-                                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', lineHeight: 1.3 }}>{f.title}</h3>
-                                <p className="text-secondary" style={{ flexGrow: 1, marginBottom: '2rem' }}>{f.desc}</p>
-                                <div className="text-mono text-xs" style={{
-                                    padding: '8px 12px',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    borderRadius: '4px',
-                                    display: 'inline-block',
-                                    color: 'var(--color-text-tertiary)'
-                                }}>
-                                    {f.mono}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* FINAL CTA */}
-            <section style={{ padding: '6rem 0', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <div className="container">
-                    <h2 style={{ fontSize: '3rem', marginBottom: '2rem' }}>Ready to deploy?</h2>
+                <div className="cta-group flex gap-6">
                     <button
-                        className="btn-tech btn-primary"
-                        style={{ padding: '0 40px', height: '56px', fontSize: '1.1rem' }}
                         onClick={() => navigate('/register')}
+                        className="px-8 py-4 bg-white text-black font-bold rounded-lg hover:scale-105 transition-transform"
                     >
-                        Initialize Workspace
+                        Initialize Console
+                    </button>
+                    <button className="px-8 py-4 border border-white/20 text-white rounded-lg hover:bg-white/5 transition-colors backdrop-blur-md">
+                        System Architecture
                     </button>
                 </div>
             </section>
+
+            {/* FEATURES SECTION (DEPTH LAYERS) */}
+            <section className="py-32 px-6 relative z-10">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[
+                        { num: '01', title: 'Flow Dynamics', desc: 'Real-time computation of fluid velocity and pressure gradients.' },
+                        { num: '02', title: 'Thermal Logic', desc: 'Predictive heat-map generation using historical sensor arrays.' },
+                        { num: '03', title: 'Audit Ready', desc: 'Automated generation of ISO-compliant safety documentation.' }
+                    ].map((f, i) => (
+                        <div key={i} className="feature-panel p-10 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors group">
+                            <div className="text-sm font-mono text-gray-500 mb-6 group-hover:text-accent transition-colors">
+                                COMPONENT // {f.num}
+                            </div>
+                            <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
+                            <p className="text-gray-400 leading-relaxed">{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
         </div>
     );
 }

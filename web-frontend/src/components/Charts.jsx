@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,165 +12,97 @@ import {
 } from 'chart.js';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import gsap from 'gsap';
+import { useEffect } from 'react';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    LineElement,
-    PointElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
 export default function Charts({ statistics, equipmentData }) {
+
     useEffect(() => {
-        // Animate charts on mount
-        gsap.from('.chart-panel', {
-            opacity: 0,
-            y: 20,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: 'power3.out',
-        });
+        gsap.from('canvas', { opacity: 0, duration: 1, delay: 0.2 });
     }, [statistics]);
 
-    if (!statistics || !equipmentData) {
-        return (
-            <div className="text-center p-12 text-secondary text-mono">
-                AWAITING_DATA_STREAM...
-            </div>
-        );
-    }
+    if (!statistics) return <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No Data Available</div>;
 
-    const themeColors = {
-        accent: '#4F8CFF',
-        success: '#2ED573',
-        warning: '#FFA502',
-        error: '#FF4757',
-        text: '#EAEAF0',
-        grid: 'rgba(255, 255, 255, 0.05)',
-        tooltipBg: 'rgba(21, 26, 33, 0.95)'
-    };
-
-    // Equipment Type Distribution (Pie Chart)
-    const pieData = {
-        labels: Object.keys(statistics.equipment_type_distribution),
-        datasets: [{
-            label: 'Count',
-            data: Object.values(statistics.equipment_type_distribution),
-            backgroundColor: [
-                themeColors.accent,
-                themeColors.success,
-                themeColors.warning,
-                themeColors.error,
-                '#70A1FF',
-                '#A4B0BE'
-            ],
-            borderWidth: 0,
-        }],
-    };
-
-    // Flowrate vs Pressure (Bar Chart)
-    const equipmentTypes = [...new Set(equipmentData.map(eq => eq.equipment_type))];
-    const avgFlowrateByType = equipmentTypes.map(type => {
-        const filtered = equipmentData.filter(eq => eq.equipment_type === type);
-        const sum = filtered.reduce((acc, eq) => acc + eq.flowrate, 0);
-        return (sum / filtered.length).toFixed(2);
-    });
-    const avgPressureByType = equipmentTypes.map(type => {
-        const filtered = equipmentData.filter(eq => eq.equipment_type === type);
-        const sum = filtered.reduce((acc, eq) => acc + eq.pressure, 0);
-        return (sum / filtered.length).toFixed(2);
-    });
-
-    const barData = {
-        labels: equipmentTypes,
-        datasets: [
-            {
-                label: 'Avg Flowrate',
-                data: avgFlowrateByType,
-                backgroundColor: themeColors.accent,
-                borderRadius: 4,
-            },
-            {
-                label: 'Avg Pressure',
-                data: avgPressureByType,
-                backgroundColor: themeColors.success,
-                borderRadius: 4,
-            },
-        ],
-    };
-
-    // Temperature Trend (Line Chart)
-    const lineData = {
-        labels: equipmentData.map((eq, idx) => idx + 1),
-        datasets: [{
-            label: 'Temperature',
-            data: equipmentData.map(eq => eq.temperature),
-            borderColor: themeColors.error,
-            backgroundColor: 'rgba(255, 71, 87, 0.1)',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: themeColors.error,
-            pointRadius: 2,
-            fill: true
-        }],
+    // THEME COLORS
+    const theme = {
+        accent: '#4F46E5',
+        success: '#10B981',
+        text: '#E2E8F0',
+        grid: 'rgba(255,255,255,0.05)'
     };
 
     const commonOptions = {
         responsive: true,
-        maintainAspectRatio: false,
         plugins: {
-            legend: {
-                labels: { color: themeColors.text, font: { family: "'Inter', sans-serif", size: 11 } },
-                position: 'bottom'
-            },
-            tooltip: {
-                backgroundColor: themeColors.tooltipBg,
-                titleColor: themeColors.text,
-                bodyColor: themeColors.text,
-                borderColor: 'rgba(255,255,255,0.1)',
-                borderWidth: 1,
-                padding: 10,
-                titleFont: { family: "'Space Grotesk', sans-serif" },
-                bodyFont: { family: "'JetBrains Mono', monospace" }
-            },
+            legend: { labels: { color: theme.text } },
+            tooltip: { backgroundColor: '#1E293B', titleColor: '#fff', bodyColor: '#fff' }
         },
         scales: {
-            x: {
-                grid: { color: themeColors.grid },
-                ticks: { color: themeColors.text, font: { size: 10 } }
-            },
-            y: {
-                grid: { color: themeColors.grid },
-                ticks: { color: themeColors.text, font: { size: 10 } }
-            }
+            x: { time: { unit: 'month' }, grid: { color: theme.grid }, ticks: { color: theme.text } },
+            y: { grid: { color: theme.grid }, ticks: { color: theme.text } }
         }
     };
 
+    // Data Prep
+    const pieData = {
+        labels: Object.keys(statistics.equipment_type_distribution),
+        datasets: [{
+            data: Object.values(statistics.equipment_type_distribution),
+            backgroundColor: [theme.accent, theme.success, '#F59E0B', '#EF4444', '#8B5CF6'],
+            borderWidth: 0
+        }]
+    };
+
+    const types = [...new Set(equipmentData.map(d => d.equipment_type))];
+    const avgFlow = types.map(t => {
+        const subset = equipmentData.filter(d => d.equipment_type === t);
+        return subset.reduce((a, b) => a + b.flowrate, 0) / subset.length;
+    });
+
+    const barData = {
+        labels: types,
+        datasets: [{
+            label: 'Avg Flowrate',
+            data: avgFlow,
+            backgroundColor: theme.accent,
+            borderRadius: 4
+        }]
+    };
+
+    const lineData = {
+        labels: equipmentData.map((_, i) => i + 1),
+        datasets: [{
+            label: 'Temp Gradient',
+            data: equipmentData.map(d => d.temperature),
+            borderColor: '#EF4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0
+        }]
+    };
+
     return (
-        <div className="grid-cols-2" style={{ gap: '1.5rem' }}>
-            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: 'span 1' }}>
-                <h4 className="text-label mb-4">TYPE DISTRIBUTION</h4>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div style={{ background: '#1E293B', padding: '1rem', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: '1rem', fontSize: '0.8rem', color: '#94A3B8' }}>DISTRIBUTION</h4>
                 <div style={{ height: '250px' }}>
                     <Pie data={pieData} options={{ ...commonOptions, maintainAspectRatio: false }} />
                 </div>
             </div>
 
-            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: 'span 1' }}>
-                <h4 className="text-label mb-4">FLOW vs PRESSURE</h4>
+            <div style={{ background: '#1E293B', padding: '1rem', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: '1rem', fontSize: '0.8rem', color: '#94A3B8' }}>FLOW ANALYSIS</h4>
                 <div style={{ height: '250px' }}>
-                    <Bar data={barData} options={commonOptions} />
+                    <Bar data={barData} options={{ ...commonOptions, maintainAspectRatio: false }} />
                 </div>
             </div>
 
-            <div className="chart-panel surface-card p-4" style={{ padding: '1.5rem', gridColumn: '1 / -1' }}>
-                <h4 className="text-label mb-4">TEMPERATURE GRADIENT</h4>
+            <div style={{ gridColumn: '1 / -1', background: '#1E293B', padding: '1rem', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: '1rem', fontSize: '0.8rem', color: '#94A3B8' }}>THERMAL MONITOR</h4>
                 <div style={{ height: '300px' }}>
-                    <Line data={lineData} options={commonOptions} />
+                    <Line data={lineData} options={{ ...commonOptions, maintainAspectRatio: false }} />
                 </div>
             </div>
         </div>

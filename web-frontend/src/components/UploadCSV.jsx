@@ -13,45 +13,55 @@ export default function UploadCSV({ onUploadSuccess }) {
 
         setUploading(true);
 
-        // Progress simulation
-        gsap.to(btnRef.current, {
-            background: 'linear-gradient(90deg, var(--color-accent) 0%, var(--bg-surface) 0%)',
-            duration: 2,
-            onUpdate: function () {
-                const prog = this.progress() * 100;
-                btnRef.current.style.background = `linear-gradient(90deg, rgba(79, 140, 255, 0.2) ${prog}%, transparent ${prog}%)`;
-            }
-        });
-
         try {
-            await datasetAPI.uploadCSV(file);
+            await datasetAPI.uploadCSV(file, (progress) => {
+                gsap.to(btnRef.current, {
+                    '--progress': `${progress}%`,
+                    duration: 0.5
+                });
+            });
             onUploadSuccess();
         } catch (err) {
-            alert('Upload failed');
+            console.error(err);
+            alert(err.response?.data?.error || 'Upload failed');
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
-            gsap.set(btnRef.current, { background: 'transparent' });
+            gsap.set(btnRef.current, { '--progress': '0%' });
         }
     };
 
     return (
-        <div style={{ position: 'relative' }}>
+        <div className="relative">
             <input
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept=".csv"
-                style={{ display: 'none' }}
+                className="hidden"
             />
             <button
                 ref={btnRef}
-                className="btn-tech btn-primary"
+                className="btn btn-primary relative overflow-hidden group"
                 onClick={() => fileInputRef.current.click()}
                 disabled={uploading}
-                style={{ overflow: 'hidden' }}
+                style={{ background: 'linear-gradient(90deg, rgba(79, 140, 255, 0.4) var(--progress, 0%), var(--color-accent) var(--progress, 0%))' }}
             >
-                {uploading ? 'INGESTING PREFLIGHT...' : 'UPLOAD DATASET'}
+                <span className="relative z-10 flex items-center gap-2">
+                    {uploading ? (
+                        <>
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            INGESTING...
+                        </>
+                    ) : (
+                        <>
+                            <span>UPLOAD DATASET</span>
+                            <span className="text-xs opacity-60">(.CSV)</span>
+                        </>
+                    )}
+                </span>
+                {/* Progress Bar Overlay */}
+                <div className="absolute inset-0 bg-accent/20 w-[var(--progress,0%)] transition-all duration-300 pointer-events-none" />
             </button>
         </div>
     );

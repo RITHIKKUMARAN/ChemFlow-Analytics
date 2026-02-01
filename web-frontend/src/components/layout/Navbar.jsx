@@ -8,63 +8,35 @@ export default function Navbar() {
 
     useEffect(() => {
         gsap.from(navRef.current, {
-            y: -20,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power3.out',
-            delay: 0.2
+            y: -20, opacity: 0, duration: 0.8, ease: 'power3.out'
         });
     }, []);
 
     return (
-        <nav ref={navRef} className="glass-panel" style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 'var(--header-height)',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 2rem'
-        }}>
-            <div className="container flex justify-between items-center">
+        <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 py-4 border-b border-white/5 bg-background/50 backdrop-blur-md">
+            <div className="container mx-auto px-6 h-full flex justify-between items-center">
                 <div
-                    className="flex items-center gap-4 cursor-pointer"
+                    className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => navigate('/')}
                 >
-                    <div style={{
-                        width: '32px',
-                        height: '32px',
-                        background: 'var(--color-accent)',
-                        borderRadius: '6px',
-                        display: 'grid',
-                        placeItems: 'center',
-                        fontSize: '18px',
-                        color: 'white'
-                    }}>⚗️</div>
-                    <span style={{
-                        fontFamily: 'var(--font-heading)',
-                        fontSize: '1.25rem',
-                        fontWeight: 600,
-                        letterSpacing: '-0.01em'
-                    }}>
-                        ChemFlow
+                    <div className="text-2xl animate-float">⚗️</div>
+                    <span className="font-display font-bold text-lg tracking-tight">
+                        ChemFlow<span className="text-accent">Visualizer</span>
                     </span>
                 </div>
 
                 <div className="flex gap-4">
                     <button
-                        className="btn-tech btn-secondary"
+                        className="btn btn-outline"
                         onClick={() => navigate('/login')}
                     >
                         Sign In
                     </button>
                     <button
-                        className="btn-tech btn-primary"
+                        className="btn btn-primary"
                         onClick={() => navigate('/register')}
                     >
-                        Get Started
+                        Initialize
                     </button>
                 </div>
             </div>

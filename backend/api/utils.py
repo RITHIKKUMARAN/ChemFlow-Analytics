@@ -28,6 +28,13 @@ def parse_csv_file(csv_file):
         df = pd.read_csv(csv_file)
         
         # Validate required columns
+        # Map sample data headers to model fields
+        column_mapping = {
+            'Equipment Name': 'Equipment_ID',
+            'Type': 'Equipment_Type'
+        }
+        df = df.rename(columns=column_mapping)
+
         required_columns = ['Equipment_ID', 'Equipment_Type', 'Flowrate', 'Pressure', 'Temperature']
         missing_columns = [col for col in required_columns if col not in df.columns]
         

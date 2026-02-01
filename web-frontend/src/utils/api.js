@@ -87,7 +87,8 @@ export const datasetAPI = {
 
         const response = await api.post('/upload-csv', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                // Let browser set Content-Type with boundary
+                'Content-Type': undefined,
             },
             onUploadProgress: (progressEvent) => {
                 if (onProgress) {

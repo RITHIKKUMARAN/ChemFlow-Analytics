@@ -1,187 +1,152 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authAPI, datasetAPI } from '../utils/api';
+import { useState, useEffect } from 'react';
+import { datasetAPI } from '../utils/api';
 import gsap from 'gsap';
+import { useGSAP } from '../hooks/useGSAP';
 import UploadCSV from '../components/UploadCSV';
 import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import HistoryPanel from '../components/HistoryPanel';
 import Navbar from '../components/layout/Navbar';
+import Scene from '../components/canvas/Scene';
 
 export default function Dashboard() {
-    const navigate = useNavigate();
     const [statistics, setStatistics] = useState(null);
     const [equipmentData, setEquipmentData] = useState([]);
     const [history, setHistory] = useState([]);
-    const [currentDatasetId, setCurrentDatasetId] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [datasetId, setDatasetId] = useState(null);
 
-    const dashboardRef = useRef(null);
+    // Cinematic Entrance
+    const container = useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
 
-    useEffect(() => {
-        loadHistory();
-        loadLatestData();
-    }, []);
+        tl.from('.dash-nav', { y: -50, opacity: 0, duration: 1 })
+            .from('.stat-tile', {
+                scale: 0.8,
+                opacity: 0,
+                y: 20,
+                stagger: 0.1,
+                duration: 1.2
+            }, '-=0.5')
+            .from('.main-panel', {
+                y: 50,
+                opacity: 0,
+                duration: 1
+            }, '-=0.8');
+    });
 
-    useEffect(() => {
-        if (statistics) {
-            const ctx = gsap.context(() => {
-                gsap.from('.dash-item', {
-                    y: 20,
-                    opacity: 0,
-                    duration: 0.6,
-                    stagger: 0.05,
-                    ease: 'power2.out'
-                });
+    useEffect(() => { loadData(); }, []);
 
-                gsap.from('.metric-val', {
-                    textContent: 0,
-                    duration: 1.5,
-                    ease: 'power2.out',
-                    snap: { textContent: 1 },
-                    stagger: 0.1
-                });
-            }, dashboardRef);
-            return () => ctx.revert();
-        }
-    }, [statistics]);
-
-    const loadHistory = async () => {
+    const loadData = async () => {
         try {
-            const result = await datasetAPI.getHistory();
-            setHistory(result.datasets || []);
-        } catch (err) {
-            console.error('Failed to load history:', err);
-        }
-    };
-
-    const loadLatestData = async () => {
-        setLoading(true);
-        try {
-            const result = await datasetAPI.getSummary();
-            setStatistics(result);
-            setEquipmentData(result.equipment_data || []);
-            setCurrentDatasetId(result.dataset_info?.id);
-        } catch (err) {
-            console.error('Failed to load data:', err);
-            // Quiet fail for empty state
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUploadSuccess = async () => {
-        await loadHistory();
-        await loadLatestData();
-    };
-
-    const handleSelectDataset = async (datasetId) => {
-        setLoading(true);
-        try {
-            const result = await datasetAPI.getSummary(datasetId);
-            setStatistics(result);
-            setEquipmentData(result.equipment_data || []);
-            setCurrentDatasetId(datasetId);
-        } catch (err) {
-            console.error('Failed to load dataset:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDownloadPDF = async () => {
-        if (!currentDatasetId) return;
-        try {
-            await datasetAPI.downloadPDF(currentDatasetId);
-        } catch (err) {
-            alert('Failed to download PDF');
-        }
+            const [histRes, statRes] = await Promise.all([
+                datasetAPI.getHistory(),
+                datasetAPI.getSummary()
+            ]);
+            setHistory(histRes.datasets || []);
+            setStatistics(statRes || null);
+            setEquipmentData(statRes.equipment_data || []);
+            setDatasetId(statRes.dataset_info?.id);
+        } catch (err) { console.error(err); }
     };
 
     return (
-        <div className="bg-app min-h-screen text-primary" ref={dashboardRef}>
-            <Navbar />
+        <div ref={container} className="relative min-h-screen text-white">
+            <Scene />
+            <Navbar className="dash-nav" />
 
-            <main className="container" style={{ paddingTop: 'calc(var(--header-height) + 2rem)', paddingBottom: '4rem' }}>
+            <div className="page-container" style={{ paddingTop: '100px', maxWidth: '1600px' }}>
 
-                {/* HEADER AREA */}
-                <div className="flex justify-between items-end mb-8 dash-item">
+                {/* HEAD UP DISPLAY (HUD) */}
+                <div className="flex justify-between items-end mb-10 dash-nav border-b border-white/10 pb-6">
                     <div>
-                        <div className="text-label mb-2">WORKSPACE / ANALYTICS</div>
-                        <h1 style={{ fontSize: '2rem' }}>Dashboard Console</h1>
+                        <div className="flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                            <h1 className="text-3xl font-bold tracking-tight">MISSION CONTROL</h1>
+                        </div>
+                        <p className="text-gray-400 font-mono text-sm mt-1">
+                            SECURE TERMINAL // {datasetId ? `DATASET: ${datasetId}` : 'NO DATALINK'}
+                        </p>
                     </div>
                     <div className="flex gap-4">
                         {statistics && (
-                            <button className="btn-tech btn-secondary" onClick={handleDownloadPDF}>
-                                Export Report.pdf
+                            <button
+                                onClick={() => datasetAPI.downloadPDF(datasetId)}
+                                className="px-6 py-2 border border-white/20 hover:bg-white/10 rounded transition-colors text-sm font-mono tracking-wide"
+                            >
+                                DOWNLOAD_REPORT.PDF
                             </button>
                         )}
-                        <UploadCSV onUploadSuccess={handleUploadSuccess} />
+                        <UploadCSV onUploadSuccess={loadData} />
                     </div>
                 </div>
 
-                {/* METRICS GRID */}
+                {/* TELEMETRY STRIP */}
                 {statistics && (
-                    <div className="grid-cols-4 gap-4 mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                        {[
-                            { label: 'Total Equipment', val: statistics.total_equipment, unit: 'UNITS' },
-                            { label: 'Avg Flowrate', val: statistics.avg_flowrate.toFixed(2), unit: 'M³/H' },
-                            { label: 'Avg Pressure', val: statistics.avg_pressure.toFixed(2), unit: 'BAR' },
-                            { label: 'Avg Temp', val: statistics.avg_temperature.toFixed(2), unit: '°C' }
-                        ].map((stat, i) => (
-                            <div key={i} className="surface-card dash-item" style={{ padding: '1.5rem' }}>
-                                <div className="text-label mb-2">{stat.label}</div>
-                                <div className="flex items-end gap-2">
-                                    <div className="text-mono metric-val" style={{ fontSize: '1.75rem', lineHeight: 1 }}>{stat.val}</div>
-                                    <div className="text-label text-secondary" style={{ marginBottom: '4px' }}>{stat.unit}</div>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <StatTile label="ACTIVE UNITS" value={statistics.total_equipment} unit="NODES" delay={0} />
+                        <StatTile label="AVG PRESSURE" value={statistics.avg_pressure.toFixed(1)} unit="BAR" delay={0.1} color="#60A5FA" />
+                        <StatTile label="AVG FLOWRATE" value={statistics.avg_flowrate.toFixed(1)} unit="M³/H" delay={0.2} color="#34D399" />
+                        <StatTile label="AVG TEMP" value={statistics.avg_temperature.toFixed(1)} unit="CELSIUS" delay={0.3} color="#F87171" />
                     </div>
                 )}
 
-                {/* MAIN CONTENT SPLIT */}
-                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                {/* MAIN CONSOLE GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-350px)] min-h-[600px]">
 
-                    {/* LEFT SIDEBAR (HISTORY) */}
-                    <div className="dash-item">
-                        <HistoryPanel
-                            history={history}
-                            currentDatasetId={currentDatasetId}
-                            onSelectDataset={handleSelectDataset}
-                        />
+                    {/* LEFT: LOGS */}
+                    <div className="lg:col-span-3 h-full main-panel">
+                        <div className="h-full bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 border-b border-white/10 bg-white/5 font-mono text-xs text-gray-400">
+                                SYSTEM LOGS
+                            </div>
+                            <div className="flex-1 overflow-auto p-2">
+                                <HistoryPanel
+                                    history={history}
+                                    currentDatasetId={datasetId}
+                                    onSelectDataset={() => { }}
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* RIGHT CONTENT (CHARTS & TABLE) */}
-                    <div className="flex flex-col gap-8 dash-item">
-                        {loading ? (
-                            <div className="surface-card flex items-center justify-center" style={{ height: '400px' }}>
-                                <div className="text-mono">LOADING_DATA_STREAM...</div>
+                    {/* CENTER: VISUALIZATION */}
+                    <div className="lg:col-span-9 flex flex-col gap-6 main-panel h-full">
+                        {/* CHART ARRAY */}
+                        <div className="flex-1 bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl p-6 relative group">
+                            <div className="absolute top-4 right-4 flex gap-2">
+                                <span className="text-[10px] font-mono border border-white/20 px-2 py-0.5 rounded text-gray-500">LIVE RENDER</span>
                             </div>
-                        ) : (
-                            <>
-                                <div className="surface-card p-6" style={{ padding: '1.5rem' }}>
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h3 style={{ fontSize: '1.25rem' }}>Parameter Visualizers</h3>
-                                        <div className="text-label">Real-time Render</div>
-                                    </div>
-                                    <Charts statistics={statistics} equipmentData={equipmentData} />
-                                </div>
+                            <Charts statistics={statistics} equipmentData={equipmentData} />
+                        </div>
 
-                                <div className="surface-card p-6" style={{ padding: '1.5rem' }}>
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h3 style={{ fontSize: '1.25rem' }}>Raw Data Matrix</h3>
-                                        <div className="text-label">{equipmentData.length} RECORDS</div>
-                                    </div>
-                                    <DataTable data={equipmentData} />
-                                </div>
-                            </>
-                        )}
+                        {/* DATA STREAM */}
+                        <div className="h-1/3 bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center px-6">
+                                <span className="font-mono text-xs text-gray-400">INCOMING STREAM</span>
+                                <span className="font-mono text-xs text-accent">{equipmentData.length} RECORDS PARSED</span>
+                            </div>
+                            <div className="flex-1 overflow-auto">
+                                <DataTable data={equipmentData} />
+                            </div>
+                        </div>
                     </div>
 
                 </div>
 
-            </main>
+            </div>
+        </div>
+    );
+}
+
+function StatTile({ label, value, unit, delay, color = 'white' }) {
+    return (
+        <div className="stat-tile bg-[#0B0F15]/60 backdrop-blur-sm border border-white/10 p-6 rounded-xl relative overflow-hidden group hover:border-white/30 transition-colors">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-bl-full -mr-10 -mt-10" />
+            <div className="font-mono text-xs text-gray-500 mb-2 tracking-widest">{label}</div>
+            <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold font-mono tracking-tighter" style={{ color }}>{value}</span>
+                <span className="text-xs font-mono text-gray-600">{unit}</span>
+            </div>
         </div>
     );
 }

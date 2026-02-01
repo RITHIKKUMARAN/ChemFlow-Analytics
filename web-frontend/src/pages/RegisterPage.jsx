@@ -1,139 +1,92 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import gsap from 'gsap';
+import { useGSAP } from '../hooks/useGSAP';
+import Scene from '../components/canvas/Scene';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const containerRef = useRef(null);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from('.reg-item', {
-                y: 20,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.1,
-                ease: 'power3.out'
-            });
-        }, containerRef);
-        return () => ctx.revert();
-    }, []);
+    useGSAP(() => {
+        gsap.from('.register-card', {
+            y: 30,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.out"
+        });
+        gsap.from('.form-element', {
+            y: 20,
+            opacity: 0,
+            stagger: 0.1,
+            duration: 0.8,
+            delay: 0.4,
+            ease: "power2.out"
+        });
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
-
         if (formData.password !== formData.confirmPassword) {
-            setError('PASSWORDS_MISMATCH');
-            setLoading(false);
+            setError('Passwords do not match');
+            gsap.fromTo('.error-msg', { x: -10 }, { x: 10, repeat: 3, yoyo: true, duration: 0.1 });
             return;
         }
-
         try {
             await authAPI.register(formData.username, formData.email, formData.password);
-            gsap.to(containerRef.current, {
-                scale: 0.98,
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => navigate('/dashboard')
-            });
+            navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.username ? 'USER_ID_CONFLICT' : 'REGISTRATION_FAILED');
-            setLoading(false);
-            gsap.fromTo('.surface-card',
-                { x: -5 },
-                { x: 5, duration: 0.1, repeat: 3, yoyo: true }
-            );
+            const serverError = err.response?.data?.username?.[0] ||
+                err.response?.data?.password?.[0] ||
+                err.response?.data?.email?.[0] ||
+                'Registration failed';
+            setError(serverError);
+            gsap.fromTo('.error-msg', { x: -10 }, { x: 10, repeat: 3, yoyo: true, duration: 0.1 });
         }
     };
 
     return (
-        <div className="bg-app min-h-screen flex items-center justify-center p-4" ref={containerRef}>
-            <div className="surface-card p-12 relative z-10 w-full max-w-md reg-item" style={{ padding: '3rem' }}>
-                <div className="text-center mb-8">
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem', display: 'inline-block' }}>⚗️</div>
-                    <h1 className="text-2xl mb-2">New Operator</h1>
-                    <p className="text-secondary text-sm">Initialize new workspace profile</p>
+        <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+            <Scene />
+
+            <div className="card register-card w-full max-w-md p-10 relative z-10 mx-4">
+                <div className="text-center mb-8 form-element">
+                    <h2 className="text-3xl font-display font-bold text-white mb-2">Create Account</h2>
+                    <p className="text-muted">Initialize your profile</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    {error && (
-                        <div className="p-3 mb-4" style={{ background: 'rgba(255, 71, 87, 0.1)', border: '1px solid var(--color-error)', color: 'var(--color-error)' }}>
-                            <span className="text-mono">ERR: {error}</span>
-                        </div>
-                    )}
+                    {error && <div className="error-msg bg-error/10 border border-error/20 text-error p-3 rounded-lg text-center text-sm font-medium">{error}</div>}
 
-                    <div className="reg-item">
-                        <label className="text-label mb-2 block">Operator ID (Username)</label>
-                        <input
-                            type="text"
-                            className="input-tech"
-                            value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            required
-                        />
+                    <div className="input-group form-element">
+                        <label className="input-label">Username</label>
+                        <input className="form-input" type="text" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} placeholder="Choose a username" />
                     </div>
 
-                    <div className="reg-item">
-                        <label className="text-label mb-2 block">Comms Channel (Email)</label>
-                        <input
-                            type="email"
-                            className="input-tech"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            required
-                        />
+                    <div className="input-group form-element">
+                        <label className="input-label">Email</label>
+                        <input className="form-input" type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@company.com" />
                     </div>
 
-                    <div className="grid-cols-2 gap-4" style={{ display: 'grid', gap: '1rem' }}>
-                        <div className="reg-item">
-                            <label className="text-label mb-2 block">Security Key</label>
-                            <input
-                                type="password"
-                                className="input-tech"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                required
-                            />
+                    <div className="grid grid-cols-2 gap-4 form-element">
+                        <div className="input-group mb-0">
+                            <label className="input-label">Password</label>
+                            <input className="form-input" type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
                         </div>
-                        <div className="reg-item">
-                            <label className="text-label mb-2 block">Confirm Key</label>
-                            <input
-                                type="password"
-                                className="input-tech"
-                                value={formData.confirmPassword}
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                required
-                            />
+                        <div className="input-group mb-0">
+                            <label className="input-label">Confirm</label>
+                            <input className="form-input" type="password" value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="••••••••" />
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        className="btn-tech btn-primary mt-4 reg-item"
-                        disabled={loading}
-                        style={{ width: '100%' }}
-                    >
-                        {loading ? 'INITIALIZING...' : 'CREATE PROFILE'}
-                    </button>
+                    <button type="submit" className="btn btn-primary full-width form-element mt-2">Register Access</button>
                 </form>
 
-                <div className="mt-8 text-center border-t border-tech pt-6 reg-item" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <p className="text-secondary text-sm">
-                        Existing operator?{' '}
-                        <Link to="/login" className="text-accent hover:underline" style={{ color: 'var(--color-accent)' }}>
-                            Sign In
-                        </Link>
+                <div className="mt-8 text-center border-t border-white/10 pt-6 form-element">
+                    <p className="text-sm text-muted">
+                        Already have an account? <Link to="/login" className="text-accent font-bold hover:text-accent/80 transition-colors">Sign In</Link>
                     </p>
                 </div>
             </div>

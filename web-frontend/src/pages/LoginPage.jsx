@@ -1,122 +1,92 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import gsap from 'gsap';
+import { useGSAP } from '../hooks/useGSAP';
+import Scene from '../components/canvas/Scene';
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const containerRef = useRef(null);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from('.login-item', {
-                y: 20,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.1,
-                ease: 'power3.out'
-            });
-        }, containerRef);
-        return () => ctx.revert();
-    }, []);
+    useGSAP(() => {
+        gsap.from('.login-card', {
+            y: 30,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.out"
+        });
+        gsap.from('.form-element', {
+            y: 20,
+            opacity: 0,
+            stagger: 0.1,
+            duration: 0.8,
+            delay: 0.4,
+            ease: "power2.out"
+        });
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
-
         try {
             await authAPI.login(formData.username, formData.password);
-            gsap.to(containerRef.current, {
-                scale: 0.98,
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => navigate('/dashboard')
-            });
+            navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.error || 'Authentication failed');
-            setLoading(false);
-            gsap.fromTo('.surface-card',
-                { x: -5 },
-                { x: 5, duration: 0.1, repeat: 3, yoyo: true }
-            );
+            setError('Invalid credentials');
+            gsap.fromTo('.error-msg', { x: -10 }, { x: 10, repeat: 3, yoyo: true, duration: 0.1 });
         }
     };
 
     return (
-        <div className="bg-app min-h-screen flex items-center justify-center p-4" ref={containerRef}>
-            {/* Ambient Background */}
-            <div style={{
-                position: 'fixed',
-                inset: 0,
-                opacity: 0.4,
-                zIndex: 0,
-                backgroundImage: 'radial-gradient(circle at 50% 50%, #1a202c 0%, transparent 70%)'
-            }} />
+        <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+            <Scene />
 
-            <div className="surface-card p-12 relative z-10 w-full max-w-md login-item" style={{ padding: '3rem' }}>
-                <div className="text-center mb-8">
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem', display: 'inline-block' }}>⚗️</div>
-                    <h1 className="text-2xl mb-2 login-item">Console Access</h1>
-                    <p className="text-secondary text-sm login-item">Enter credentials to initialize session</p>
+            <div className="card login-card w-full max-w-md p-10 relative z-10 mx-4">
+                <div className="text-center mb-8 form-element">
+                    <div className="text-5xl mb-4 animate-float">⚗️</div>
+                    <h2 className="text-3xl font-display font-bold text-white mb-2">Welcome Back</h2>
+                    <p className="text-muted">Sign in to access your terminal</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     {error && (
-                        <div className="p-3 bg-red-900/20 border border-red-500/30 text-red-400 text-sm rounded mb-4" style={{ background: 'rgba(255, 71, 87, 0.1)', border: '1px solid var(--color-error)', color: 'var(--color-error)' }}>
-                            <span className="text-mono">ERR: {error}</span>
+                        <div className="error-msg bg-error/10 border border-error/20 text-error p-3 rounded-lg text-center text-sm font-medium">
+                            {error}
                         </div>
                     )}
 
-                    <div className="login-item">
-                        <label className="text-label mb-2 block">Username ID</label>
+                    <div className="input-group form-element">
+                        <label className="input-label">Username</label>
                         <input
                             type="text"
-                            className="input-tech"
+                            className="form-input"
                             value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            required
-                            placeholder="usr_..."
+                            onChange={e => setFormData({ ...formData, username: e.target.value })}
+                            placeholder="Enter your ID"
                         />
                     </div>
 
-                    <div className="login-item">
-                        <label className="text-label mb-2 block">Password Key</label>
+                    <div className="input-group form-element">
+                        <label className="input-label">Password</label>
                         <input
                             type="password"
-                            className="input-tech"
+                            className="form-input"
                             value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            required
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
                             placeholder="••••••••"
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        className="btn-tech btn-primary mt-4 login-item"
-                        disabled={loading}
-                        style={{ width: '100%' }}
-                    >
-                        {loading ? 'AUTHENTICATING...' : 'ESTABLISH CONNECTION'}
+                    <button type="submit" className="btn btn-primary full-width form-element mt-2">
+                        Initialize Session
                     </button>
                 </form>
 
-                <div className="mt-8 text-center border-t border-tech pt-6 login-item" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <p className="text-secondary text-sm">
-                        New terminal?{' '}
-                        <Link to="/register" className="text-accent hover:underline" style={{ color: 'var(--color-accent)' }}>
-                            Register Device
-                        </Link>
+                <div className="mt-8 text-center border-t border-white/10 pt-6 form-element">
+                    <p className="text-sm text-muted">
+                        New Operator? <Link to="/register" className="text-accent font-bold hover:text-accent/80 transition-colors">Register Access</Link>
                     </p>
-                    <div className="mt-4">
-                        <Link to="/" className="text-label text-xs hover:text-white transition-colors">
-                            ← ABORT SEQUENCE
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>
