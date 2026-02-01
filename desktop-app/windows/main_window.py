@@ -374,7 +374,7 @@ class MainWindow(QMainWindow):
     def upload_csv(self):
         """Upload CSV file"""
         file_path, _ = QFileDialog.getOpenFileName(
-            self, 'Select CSV File', '', 'CSV Files (*.csv)'
+            self, 'Select Data File', '', 'Data Files (*.csv *.xlsx *.xls)'
         )
         
         if file_path:

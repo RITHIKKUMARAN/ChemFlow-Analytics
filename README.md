@@ -176,9 +176,9 @@ python main.py
 
 ---
 
-## 📊 **CSV Format**
+## 📊 **Data Format**
 
-Your CSV must have these columns:
+Your CSV or Excel file (.xlsx, .xls) must have these columns:
 
 ```csv
 Equipment_ID,Equipment_Type,Flowrate,Pressure,Temperature

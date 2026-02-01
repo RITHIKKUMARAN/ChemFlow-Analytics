@@ -74,8 +74,17 @@ class APIClient:
         """Upload CSV file"""
         url = f"{self.api_url}/upload-csv"
         
+        filename = file_path.split('\\')[-1]
+        
+        # Determine content type
+        content_type = 'text/csv'
+        if filename.lower().endswith('.xlsx'):
+            content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        elif filename.lower().endswith('.xls'):
+            content_type = 'application/vnd.ms-excel'
+            
         with open(file_path, 'rb') as f:
-            files = {'file': (file_path.split('\\')[-1], f, 'text/csv')}
+            files = {'file': (filename, f, content_type)}
             headers = {}
             if self.access_token:
                 headers['Authorization'] = f'Bearer {self.access_token}'
