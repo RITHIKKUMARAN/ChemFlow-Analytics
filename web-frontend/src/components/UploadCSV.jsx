@@ -16,17 +16,13 @@ export default function UploadCSV({ onUploadSuccess }) {
         setUploading(true);
         setProgress(0);
 
-        // Animate progress
+        // Reset progress
         if (progressRef.current) {
-            gsap.to(progressRef.current, {
-                width: '100%',
-                duration: 2,
-                ease: 'power2.inOut'
-            });
+            gsap.set(progressRef.current, { width: '0%', backgroundColor: '#a855f7' }); // Reset to gradient start color approximation or cleared style
         }
 
         try {
-            await datasetAPI.uploadDataset(file);
+            await datasetAPI.uploadCSV(file, setProgress);
 
             // Success animation
             if (progressRef.current) {
@@ -34,7 +30,6 @@ export default function UploadCSV({ onUploadSuccess }) {
                     backgroundColor: '#34d399',
                     duration: 0.3,
                     onComplete: () => {
-                        setProgress(100);
                         setTimeout(() => {
                             setUploading(false);
                             setProgress(0);
