@@ -7,11 +7,12 @@ const AxisLabel = ({ position, label, color }) => (
     <group position={position}>
         <Text
             position={[0, 0.5, 0]}
-            fontSize={0.4}
+            fontSize={0.35}
             color={color}
-            font="https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnF8RD8yKx5.woff"
+            font="https://fonts.gstatic.com/s/bungee/v11/N0bU2SZBIuF2PU_0AnypqQ.woff"
             anchorX="center"
             anchorY="middle"
+            letterSpacing={0.08}
         >
             {label}
         </Text>
@@ -125,7 +126,7 @@ const DataPoint = ({ position, status, data, size, fixedColor }) => {
                 <Html distanceFactor={12}>
                     <div className="glass-panel p-4 rounded-xl border border-white/20 w-60 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                         <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
-                            <span className="font-['JetBrains_Mono'] font-bold text-xs text-white bg-white/10 px-2 py-1 rounded">
+                            <span className="font-['Bungee'] font-bold text-xs text-white bg-white/10 px-2 py-1 rounded tracking-wide">
                                 {data.equipment_id}
                             </span>
                             <span className="font-bold text-[10px] uppercase tracking-wider" style={{ color: color }}>
@@ -135,8 +136,8 @@ const DataPoint = ({ position, status, data, size, fixedColor }) => {
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-xs">
-                                <span className="text-slate-400">Pressure</span>
-                                <span className="font-mono text-purple-300 font-bold">{data.pressure?.toFixed(2)} bar</span>
+                                <span className="text-slate-400 font-medium">Pressure</span>
+                                <span className="font-['Bungee'] text-purple-300 text-[11px] tracking-wide">{data.pressure?.toFixed(2)} bar</span>
                             </div>
                             {/* Progress Bar for Viz */}
                             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
@@ -144,13 +145,13 @@ const DataPoint = ({ position, status, data, size, fixedColor }) => {
                             </div>
 
                             <div className="flex justify-between items-center text-xs mt-1">
-                                <span className="text-slate-400">Temp</span>
-                                <span className="font-mono text-pink-300 font-bold">{data.temperature?.toFixed(1)} °C</span>
+                                <span className="text-slate-400 font-medium">Temp</span>
+                                <span className="font-['Bungee'] text-pink-300 text-[11px] tracking-wide">{data.temperature?.toFixed(1)} °C</span>
                             </div>
 
                             <div className="flex justify-between items-center text-xs mt-1">
-                                <span className="text-slate-400">Flow</span>
-                                <span className="font-mono text-cyan-300 font-bold">{data.flowrate?.toFixed(1)} m³/h</span>
+                                <span className="text-slate-400 font-medium">Flow</span>
+                                <span className="font-['Bungee'] text-cyan-300 text-[11px] tracking-wide">{data.flowrate?.toFixed(1)} m³/h</span>
                             </div>
                         </div>
                     </div>
@@ -207,7 +208,7 @@ export default function DataVis3D({ data, comparisonData }) {
                         3D Parameter Space
                     </h3>
                 </div>
-                <p className="text-xs text-slate-400 font-['JetBrains_Mono'] max-w-[200px]">
+                <p className="text-xs text-slate-400 font-medium max-w-[200px]">
                     Interactive visualization of operating conditions in real-time.
                 </p>
             </div>
