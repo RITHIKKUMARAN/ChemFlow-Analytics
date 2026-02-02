@@ -38,7 +38,13 @@ export default function LoginPage() {
 
         try {
             // Correctly pass username and password as separate arguments
-            await authAPI.login(username, password);
+            const response = await authAPI.login(username, password);
+
+            // Store username in localStorage
+            localStorage.setItem('username', username);
+            if (response.user?.email) {
+                localStorage.setItem('email', response.user.email);
+            }
 
             // Success animation
             gsap.to(cardRef.current, {

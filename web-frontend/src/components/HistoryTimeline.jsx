@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Clock, Database, TrendingUp, FileText } from 'lucide-react';
+import { Clock, Database, TrendingUp, FileText, X } from 'lucide-react';
 import gsap from 'gsap';
+import { datasetAPI } from '../utils/api';
 
-export default function HistoryTimeline({ history, currentDatasetId, onSelectDataset }) {
+export default function HistoryTimeline({ history, currentDatasetId, onSelectDataset, onDatasetDeleted }) {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     useEffect(() => {
@@ -36,6 +37,24 @@ export default function HistoryTimeline({ history, currentDatasetId, onSelectDat
             minute: '2-digit',
             hour12: true
         });
+    };
+
+    const handleDelete = async (e, datasetId) => {
+        e.stopPropagation(); // Prevent triggering onSelectDataset
+
+        if (!confirm('Are you sure you want to delete this dataset? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await datasetAPI.deleteDataset(datasetId);
+            if (onDatasetDeleted) {
+                onDatasetDeleted(datasetId);
+            }
+        } catch (error) {
+            console.error('Failed to delete dataset:', error);
+            alert('Failed to delete dataset. Please try again.');
+        }
     };
 
     return (
@@ -80,29 +99,36 @@ export default function HistoryTimeline({ history, currentDatasetId, onSelectDat
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <Database className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-purple-400'}`} />
-                                            <span className={`font-bold text-sm ${isActive ? 'text-emerald-400' : 'text-white'}`}>
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <Database className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-emerald-400' : 'text-purple-400'}`} />
+                                            <span className={`font-bold text-sm truncate ${isActive ? 'text-emerald-400' : 'text-white'}`}>
                                                 {item.filename || `Dataset ${item.id || index + 1}`}
                                             </span>
                                         </div>
-                                        {isActive && (
-                                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-                                                ACTIVE
-                                            </span>
-                                        )}
+                                        <button
+                                            onClick={(e) => handleDelete(e, item.id || item.dataset_id)}
+                                            className="p-1 rounded-md hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all flex-shrink-0"
+                                            title="Delete dataset"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
                                     </div>
 
-                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 font-mono">
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="w-3 h-3" />
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400 font-mono">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock className="w-3 h-3 text-slate-500" />
                                             <span>{uploadDate ? formatTimestamp(uploadDate) : 'Unknown'}</span>
                                         </div>
                                         {item.total_records && (
-                                            <div className="flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" />
-                                                <span>{item.total_records} records</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <FileText className="w-3 h-3 text-slate-500" />
+                                                <span>{item.total_records} rows</span>
                                             </div>
+                                        )}
+                                        {isActive && (
+                                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                                                ACTIVE
+                                            </span>
                                         )}
                                     </div>
 

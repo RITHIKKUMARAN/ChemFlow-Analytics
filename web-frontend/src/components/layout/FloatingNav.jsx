@@ -2,10 +2,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../utils/api';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Home, LayoutDashboard, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { Home, LayoutDashboard, LogIn, UserPlus, LogOut, User } from 'lucide-react';
 import chemflowLogo from '../../assets/chemflow-logo.png';
 
-export default function FloatingNav() {
+export default function FloatingNav({ onProfileClick }) {
     const navigate = useNavigate();
     const navRef = useRef(null);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -112,6 +112,23 @@ export default function FloatingNav() {
                         >
                             <LogOut className="w-4 h-4" />
                             <span className="hidden sm:inline whitespace-nowrap">Sign Out</span>
+                        </button>
+                    )}
+
+                    {isAuthenticated && onProfileClick && (
+                        <button
+                            onClick={onProfileClick}
+                            className="ml-2 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-cyan-500/20 hover:from-purple-500/40 hover:to-cyan-500/40 border border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 flex items-center justify-center group relative overflow-hidden shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                            title="Profile Settings"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {localStorage.getItem('username') ? (
+                                <span className="font-display font-bold text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-cyan-300 group-hover:from-white group-hover:to-white transition-all text-md select-none">
+                                    {localStorage.getItem('username').charAt(0).toUpperCase()}
+                                </span>
+                            ) : (
+                                <User className="w-5 h-5 text-purple-300 group-hover:text-white transition-colors" />
+                            )}
                         </button>
                     )}
                 </div>
