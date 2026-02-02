@@ -126,16 +126,21 @@ def upload_csv(request):
         total_equipment_count=len(df)
     )
     
+    # Detect anomalies
+    from .utils import detect_anomalies
+    statuses = detect_anomalies(df)
+    
     # Bulk create equipment records
     equipment_objects = []
-    for _, row in df.iterrows():
+    for index, row in df.iterrows():
         equipment_objects.append(Equipment(
             dataset=dataset,
             equipment_id=str(row['Equipment_ID']),
             equipment_type=str(row['Equipment_Type']),
             flowrate=float(row['Flowrate']),
             pressure=float(row['Pressure']),
-            temperature=float(row['Temperature'])
+            temperature=float(row['Temperature']),
+            status=statuses[index]
         ))
     
     Equipment.objects.bulk_create(equipment_objects)

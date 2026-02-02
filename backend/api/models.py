@@ -33,8 +33,15 @@ class Equipment(models.Model):
     pressure = models.FloatField()
     temperature = models.FloatField()
     
+    STATUS_CHOICES = [
+        ('Normal', 'Normal'),
+        ('Warning', 'Warning'),
+        ('Critical', 'Critical'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Normal')
+    
     class Meta:
         ordering = ['equipment_id']
         
     def __str__(self):
-        return f"{self.equipment_id} - {self.equipment_type}"
+        return f"{self.equipment_id} - {self.equipment_type} ({self.status})"

@@ -103,6 +103,39 @@ def parse_csv_file(file_obj):
     except Exception as e:
         return False, f"Error reading file: {str(e)}"
 
+def detect_anomalies(df):
+    """
+    Simple outlier detection using Z-score method (Mean + 2*STD)
+    """
+    # Calculate statistics
+    stats = {
+        'flow': {'mean': df['Flowrate'].mean(), 'std': df['Flowrate'].std()},
+        'press': {'mean': df['Pressure'].mean(), 'std': df['Pressure'].std()},
+        'temp': {'mean': df['Temperature'].mean(), 'std': df['Temperature'].std()}
+    }
+    
+    statuses = []
+    
+    for _, row in df.iterrows():
+        status = 'Normal'
+        reasons = []
+        
+        # Check Critical ( > 2 STD)
+        if (abs(row['Flowrate'] - stats['flow']['mean']) > 2 * stats['flow']['std'] or
+            abs(row['Pressure'] - stats['press']['mean']) > 2 * stats['press']['std'] or
+            abs(row['Temperature'] - stats['temp']['mean']) > 2 * stats['temp']['std']):
+            status = 'Critical'
+            
+        # Check Warning ( > 1.5 STD) if not critical
+        elif (abs(row['Flowrate'] - stats['flow']['mean']) > 1.5 * stats['flow']['std'] or
+              abs(row['Pressure'] - stats['press']['mean']) > 1.5 * stats['press']['std'] or
+              abs(row['Temperature'] - stats['temp']['mean']) > 1.5 * stats['temp']['std']):
+            status = 'Warning'
+            
+        statuses.append(status)
+        
+    return statuses
+
 
 def compute_statistics(dataset_id):
     """

@@ -27,7 +27,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
     """Serializer for Equipment model"""
     class Meta:
         model = Equipment
-        fields = ['id', 'equipment_id', 'equipment_type', 'flowrate', 'pressure', 'temperature']
+        fields = ['id', 'equipment_id', 'equipment_type', 'flowrate', 'pressure', 'temperature', 'status']
 
 
 class DatasetSerializer(serializers.ModelSerializer):
