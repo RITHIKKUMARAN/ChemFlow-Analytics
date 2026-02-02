@@ -10,7 +10,13 @@ import {
     Download,
     Box,
     BarChart3,
-    Layers
+    Layers,
+    Zap,
+    GitCompare,
+    History,
+    ArrowUpRight,
+    ArrowDownRight,
+    XCircle
 } from 'lucide-react';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
@@ -18,6 +24,7 @@ import UploadCSV from '../components/UploadCSV';
 import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import DataVis3D from '../components/canvas/DataVis3D';
+import SentinelChat from '../components/SentinelChat';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -26,6 +33,13 @@ export default function Dashboard() {
     const [history, setHistory] = useState([]);
     const [datasetId, setDatasetId] = useState(null);
     const [viewMode, setViewMode] = useState('3d');
+
+    // Comparison State
+    const [comparisonStats, setComparisonStats] = useState(null);
+    const [comparisonData, setComparisonData] = useState(null);
+    const [showHistory, setShowHistory] = useState(false);
+
+    // Live Telemetry Simulation - REMOVED
 
     const dashRef = useRef();
 
@@ -79,6 +93,38 @@ export default function Dashboard() {
         }
     };
 
+    const handleCompare = async (targetId) => {
+        if (targetId === datasetId) {
+            clearComparison();
+            setShowHistory(false);
+            return;
+        }
+
+        try {
+            // Fetch REAL data for the target dataset
+            const targetData = await datasetAPI.getSummary(targetId);
+
+            if (targetData) {
+                setComparisonStats({
+                    id: targetId,
+                    avg_pressure: targetData.avg_pressure,
+                    avg_temperature: targetData.avg_temperature,
+                    avg_flowrate: targetData.avg_flowrate,
+                    total_equipment: targetData.total_equipment
+                });
+                setComparisonData(targetData.equipment_data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch comparison data:", error);
+        }
+        setShowHistory(false);
+    };
+
+    const clearComparison = () => {
+        setComparisonStats(null);
+        setComparisonData(null);
+    };
+
     const handleSignOut = () => {
         authAPI.logout();
         navigate('/');
@@ -89,22 +135,71 @@ export default function Dashboard() {
             <Scene />
             <FloatingNav />
 
+            {/* AI Assistant Layer */}
+            {statistics && <SentinelChat equipmentData={equipmentData} />}
+
             <div className="relative z-10 max-w-[1600px] mx-auto px-6 pt-24 pb-16">
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 pb-8 border-b border-white/10">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-glow shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
+                            <div className={`w-3 h-3 rounded-full ${comparisonStats ? 'bg-amber-400' : 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]'}`} />
                             <h1 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight">
                                 Mission Control
                             </h1>
                         </div>
-                        <p className="text-slate-400 font-['JetBrains_Mono'] text-sm">
-                            {datasetId ? `DATASET: ${datasetId}` : 'NO DATA LOADED'} • SECURE CONNECTION
+                        <p className="text-slate-400 font-['JetBrains_Mono'] text-sm flex items-center gap-2">
+                            {datasetId ? `DATASET: ${datasetId}` : 'NO DATA LOADED'}
+                            <span className="text-slate-600">•</span>
+                            {comparisonStats ? (
+                                <span className="text-amber-400 font-bold flex items-center gap-2">
+                                    COMPARING VS {comparisonStats.id}
+                                    <button onClick={clearComparison} className="hover:text-white"><XCircle className="w-4 h-4" /></button>
+                                </span>
+                            ) : 'SECURE CONNECTION'}
                         </p>
                     </div>
 
-                    <div className="flex gap-3 mt-4 lg:mt-0 items-center">
+                    <div className="flex gap-3 mt-4 lg:mt-0 items-center relative">
+                        {/* History / Compare Dropdown */}
+                        {statistics && (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowHistory(!showHistory)}
+                                    className={`group relative px-4 py-2.5 rounded-full border transition-all duration-300 backdrop-blur-md flex items-center gap-2 ${showHistory || comparisonStats
+                                        ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
+                                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                        }`}
+                                >
+                                    {comparisonStats ? <GitCompare className="w-4 h-4" /> : <History className="w-4 h-4" />}
+                                    <span className="font-medium text-sm">{comparisonStats ? 'Comparison Active' : 'Compare Dataset'}</span>
+                                </button>
+
+                                {showHistory && (
+                                    <div className="absolute top-12 right-0 w-64 glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-top-2">
+                                        <div className="p-3 border-b border-white/10 bg-black/40 text-xs font-bold text-slate-400">
+                                            SELECT BASELINE FOR COMPARISON
+                                        </div>
+                                        <div className="max-h-60 overflow-y-auto">
+                                            {history.map((h, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => handleCompare(h.id || h.dataset_id || h.filename || `Dataset ${i + 1}`)} // Prefer ID if available
+                                                    className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                                                >
+                                                    <div className="font-mono text-xs text-slate-500">{h.upload_date?.split('T')[0]}</div>
+                                                    <div className="truncate">{h.filename || `Dataset ${i + 1}`}</div>
+                                                </button>
+                                            ))}
+                                            {history.length === 0 && (
+                                                <div className="p-4 text-center text-xs text-slate-500">No history available</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {statistics && (
                             <button
                                 onClick={() => datasetAPI.downloadPDF(datasetId)}
@@ -127,13 +222,15 @@ export default function Dashboard() {
                             unit="nodes"
                             color="#a78bfa"
                             icon={<Box className="w-6 h-6" />}
+                            comparison={comparisonStats ? statistics.total_equipment - comparisonStats.total_equipment : null}
                         />
                         <MetricCard
                             label="Avg Pressure"
                             value={statistics.avg_pressure.toFixed(1)}
                             unit="bar"
                             color="#22d3ee"
-                            icon={<Activity className="w-6 h-6" />}
+                            icon={<Zap className="w-6 h-6" />}
+                            comparison={comparisonStats ? statistics.avg_pressure - comparisonStats.avg_pressure : null}
                         />
                         <MetricCard
                             label="Avg Flowrate"
@@ -141,6 +238,7 @@ export default function Dashboard() {
                             unit="m³/h"
                             color="#34d399"
                             icon={<Droplets className="w-6 h-6" />}
+                            comparison={comparisonStats ? statistics.avg_flowrate - comparisonStats.avg_flowrate : null}
                         />
                         <MetricCard
                             label="Avg Temp"
@@ -148,6 +246,7 @@ export default function Dashboard() {
                             unit="°C"
                             color="#f472b6"
                             icon={<Thermometer className="w-6 h-6" />}
+                            comparison={comparisonStats ? statistics.avg_temperature - comparisonStats.avg_temperature : null}
                         />
                     </div>
                 )}
@@ -157,11 +256,11 @@ export default function Dashboard() {
                     {/* Visualization */}
                     <div className="glass-panel rounded-2xl p-6 border border-white/10">
                         {/* Tabs */}
-                        <div className="flex gap-2 mb-6">
+                        <div className="flex w-full gap-2 mb-6 p-1 bg-white/5 rounded-xl border border-white/10">
                             <button
                                 onClick={() => setViewMode('3d')}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${viewMode === '3d'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${viewMode === '3d'
+                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
@@ -170,8 +269,8 @@ export default function Dashboard() {
                             </button>
                             <button
                                 onClick={() => setViewMode('charts')}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${viewMode === 'charts'
-                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${viewMode === 'charts'
+                                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
@@ -183,7 +282,7 @@ export default function Dashboard() {
                         {/* Visualization Area */}
                         <div className="min-h-[500px]">
                             {statistics && viewMode === '3d' && (
-                                <DataVis3D data={equipmentData} />
+                                <DataVis3D data={equipmentData} comparisonData={comparisonData} />
                             )}
                             {statistics && viewMode === 'charts' && (
                                 <Charts statistics={statistics} equipmentData={equipmentData} />
@@ -223,9 +322,16 @@ export default function Dashboard() {
     );
 }
 
-function MetricCard({ label, value, unit, color, icon }) {
+function MetricCard({ label, value, unit, color, icon, comparison }) {
     return (
-        <div className="metric-card glass-panel p-6 rounded-xl border border-white/10 group hover:border-white/20 transition-all cursor-default">
+        <div className="metric-card glass-panel p-6 rounded-xl border border-white/10 group hover:border-white/20 transition-all cursor-default relative overflow-hidden">
+            {comparison !== null && comparison !== undefined && (
+                <div className={`absolute top-0 right-0 p-3 ${comparison > 0 ? 'text-emerald-400' : 'text-rose-400'} flex items-center gap-1 text-xs font-bold font-mono bg-white/5 rounded-bl-xl`}>
+                    {comparison > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(comparison).toFixed(1)} {unit}
+                </div>
+            )}
+
             <div className="flex items-start justify-between mb-3">
                 <span className="text-white/80">{icon}</span>
                 <div
@@ -250,6 +356,11 @@ function MetricCard({ label, value, unit, color, icon }) {
             >
                 {value}
             </div>
+            {comparison !== null && comparison !== undefined && (
+                <div className="mt-2 text-[10px] text-slate-500 font-mono">
+                    vs previous run
+                </div>
+            )}
         </div >
     );
 }
