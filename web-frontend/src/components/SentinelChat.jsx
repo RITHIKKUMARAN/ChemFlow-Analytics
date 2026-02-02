@@ -149,12 +149,57 @@ export default function SentinelChat({ equipmentData }) {
                 </div>
             </div>
 
-            {/* Chat Trigger Button */}
+            {/* Robot Animation Styles */}
+            <style>{`
+                @keyframes blink {
+                    0%, 90%, 100% { transform: scaleY(1); }
+                    95% { transform: scaleY(0.1); }
+                }
+                @keyframes scan {
+                    0% { transform: translateY(-100%); }
+                    100% { transform: translateY(100%); }
+                }
+            `}</style>
+
+            {/* Chat Trigger - Interactive Robot Head */}
             <button
                 onClick={toggleOpen}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_30px_rgba(34,211,238,0.4)] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group"
+                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-b from-cyan-500 to-blue-600 border border-cyan-400/30 shadow-[0_0_40px_rgba(6,182,212,0.5)] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group overflow-hidden"
             >
-                {open ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6 animate-bounce-short" />}
+                {/* Holographic Ring */}
+                <div className="absolute inset-0 rounded-full border-t border-l border-white/40 opacity-50 w-full h-full animate-[spin_6s_linear_infinite]" />
+
+                {/* Glowing Core Background */}
+                <div className="absolute inset-0 bg-radial-at-t from-white/20 to-transparent opacity-50" />
+
+                {open ? (
+                    <X className="w-6 h-6 text-white relative z-10" />
+                ) : (
+                    <div className="relative z-10 flex flex-col items-center justify-center mt-1">
+                        {/* Robot Face Container */}
+                        <div className="flex flex-col items-center gap-1.5 transform group-hover:-translate-y-0.5 transition-transform duration-300">
+                            {/* Eyes */}
+                            <div className="flex gap-2">
+                                {/* Left Eye */}
+                                <div
+                                    className="w-2.5 h-3.5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-[blink_4s_infinite_both]"
+                                    style={{ animationDelay: '0.1s' }}
+                                />
+                                {/* Right Eye */}
+                                <div
+                                    className="w-2.5 h-3.5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-[blink_4s_infinite_both]"
+                                    style={{ animationDelay: '0.2s' }}
+                                />
+                            </div>
+
+                            {/* Mouth/Expression - Smile */}
+                            <div className="w-3 h-1.5 border-b-2 border-white/80 rounded-[50%] group-hover:w-5 group-hover:border-white transition-all duration-300 ease-out shadow-[0_2px_8px_rgba(255,255,255,0.5)]" />
+                        </div>
+                    </div>
+                )}
+
+                {/* Scanline Effect */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent translate-y-[-100%] animate-[scan_3s_linear_infinite] pointer-events-none" />
             </button>
 
             {/* AI Panel */}
@@ -180,23 +225,7 @@ export default function SentinelChat({ equipmentData }) {
                     <Cpu className="w-4 h-4 text-slate-500" />
                 </div>
 
-                {/* Insights Feed */}
-                <div className="p-3 bg-cyan-950/20 border-b border-white/10">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Activity className="w-3 h-3 text-cyan-400" />
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wide">Live Diagnostics</span>
-                    </div>
-                    <div className="space-y-1.5">
-                        {health.insights.map((insight, idx) => (
-                            <div key={idx} className="flex items-start gap-2 text-[11px] text-slate-300 font-mono bg-black/20 p-1.5 rounded border-l-2 border-cyan-500/50">
-                                <TerminalIcon className="w-3 h-3 text-cyan-500 mt-0.5 shrink-0" />
-                                {insight}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Messages Area */}
+                {/* Messages Area - Diagnostics Removed */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                     {messages.map((msg, idx) => (
                         <div
