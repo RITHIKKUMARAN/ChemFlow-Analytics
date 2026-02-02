@@ -16,7 +16,9 @@ import {
     History,
     ArrowUpRight,
     ArrowDownRight,
-    XCircle
+    XCircle,
+    Database,
+    AlertTriangle
 } from 'lucide-react';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
@@ -25,6 +27,8 @@ import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import DataVis3D from '../components/canvas/DataVis3D';
 import SentinelChat from '../components/SentinelChat';
+import HistoryTimeline from '../components/HistoryTimeline';
+import WarningNodes from '../components/WarningNodes';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -34,10 +38,11 @@ export default function Dashboard() {
     const [datasetId, setDatasetId] = useState(null);
     const [viewMode, setViewMode] = useState('3d');
 
-    // Comparison State
     const [comparisonStats, setComparisonStats] = useState(null);
     const [comparisonData, setComparisonData] = useState(null);
-    const [showHistory, setShowHistory] = useState(false);
+    const [showCompareDropdown, setShowCompareDropdown] = useState(false);
+    const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+    const [showWarningsPanel, setShowWarningsPanel] = useState(false);
 
     // Live Telemetry Simulation - REMOVED
 
@@ -96,7 +101,7 @@ export default function Dashboard() {
     const handleCompare = async (targetId) => {
         if (targetId === datasetId) {
             clearComparison();
-            setShowHistory(false);
+            setShowCompareDropdown(false);
             return;
         }
 
@@ -117,7 +122,7 @@ export default function Dashboard() {
         } catch (error) {
             console.error("Failed to fetch comparison data:", error);
         }
-        setShowHistory(false);
+        setShowCompareDropdown(false);
     };
 
     const clearComparison = () => {
@@ -161,12 +166,16 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex gap-3 mt-4 lg:mt-0 items-center relative">
-                        {/* History / Compare Dropdown */}
+                        {/* Compare Dataset Dropdown */}
                         {statistics && (
                             <div className="relative">
                                 <button
-                                    onClick={() => setShowHistory(!showHistory)}
-                                    className={`group relative px-4 py-2.5 rounded-full border transition-all duration-300 backdrop-blur-md flex items-center gap-2 ${showHistory || comparisonStats
+                                    onClick={() => {
+                                        setShowCompareDropdown(!showCompareDropdown);
+                                        setShowHistoryPanel(false);
+                                        setShowWarningsPanel(false);
+                                    }}
+                                    className={`group relative px-4 py-2.5 rounded-full border transition-all duration-300 backdrop-blur-md flex items-center gap-2 ${showCompareDropdown || comparisonStats
                                         ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
                                         : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                                         }`}
@@ -175,7 +184,7 @@ export default function Dashboard() {
                                     <span className="font-medium text-sm">{comparisonStats ? 'Comparison Active' : 'Compare Dataset'}</span>
                                 </button>
 
-                                {showHistory && (
+                                {showCompareDropdown && (
                                     <div className="absolute top-12 right-0 w-64 glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-top-2">
                                         <div className="p-3 border-b border-white/10 bg-black/40 text-xs font-bold text-slate-400">
                                             SELECT BASELINE FOR COMPARISON
@@ -184,10 +193,10 @@ export default function Dashboard() {
                                             {history.map((h, i) => (
                                                 <button
                                                     key={i}
-                                                    onClick={() => handleCompare(h.id || h.dataset_id || h.filename || `Dataset ${i + 1}`)} // Prefer ID if available
+                                                    onClick={() => handleCompare(h.id || h.dataset_id || h.filename || `Dataset ${i + 1}`)}
                                                     className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors border-b border-white/5 last:border-0"
                                                 >
-                                                    <div className="font-mono text-xs text-slate-500">{h.upload_date?.split('T')[0]}</div>
+                                                    <div className="font-mono text-xs text-slate-500">{h.upload_timestamp?.split('T')[0]}</div>
                                                     <div className="truncate">{h.filename || `Dataset ${i + 1}`}</div>
                                                 </button>
                                             ))}
@@ -195,6 +204,75 @@ export default function Dashboard() {
                                                 <div className="p-4 text-center text-xs text-slate-500">No history available</div>
                                             )}
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Mission Log (History) Dropdown */}
+                        {statistics && (
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setShowHistoryPanel(!showHistoryPanel);
+                                        setShowCompareDropdown(false);
+                                        setShowWarningsPanel(false);
+                                    }}
+                                    className={`group relative px-4 py-2.5 rounded-full border transition-all duration-300 backdrop-blur-md flex items-center gap-2 ${showHistoryPanel
+                                        ? 'bg-purple-500/10 border-purple-500/50 text-purple-400'
+                                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <Database className="w-4 h-4" />
+                                    <span className="font-medium text-sm">Mission Log</span>
+                                    {history.length > 0 && (
+                                        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold">
+                                            {history.length}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {showHistoryPanel && (
+                                    <div className="absolute top-12 right-0 w-96 glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-top-2">
+                                        <HistoryTimeline
+                                            history={history}
+                                            currentDatasetId={datasetId}
+                                            onSelectDataset={(id) => {
+                                                datasetAPI.getSummary(id).then(data => {
+                                                    setStatistics(data);
+                                                    setEquipmentData(data.equipment_data || []);
+                                                    setDatasetId(id);
+                                                    clearComparison();
+                                                    setShowHistoryPanel(false);
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Anomaly Warnings Dropdown */}
+                        {statistics && equipmentData.length > 0 && (
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setShowWarningsPanel(!showWarningsPanel);
+                                        setShowCompareDropdown(false);
+                                        setShowHistoryPanel(false);
+                                    }}
+                                    className={`group relative px-4 py-2.5 rounded-full border transition-all duration-300 backdrop-blur-md flex items-center gap-2 ${showWarningsPanel
+                                        ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
+                                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <AlertTriangle className="w-4 h-4" />
+                                    <span className="font-medium text-sm">Anomalies</span>
+                                </button>
+
+                                {showWarningsPanel && (
+                                    <div className="absolute top-12 right-0 w-[32rem] glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-top-2">
+                                        <WarningNodes equipmentData={equipmentData} />
                                     </div>
                                 )}
                             </div>
