@@ -77,6 +77,20 @@ export const authAPI = {
     isAuthenticated: () => {
         return !!localStorage.getItem('accessToken');
     },
+
+    getProfile: async () => {
+        const response = await api.get('/auth/me');
+        return response.data;
+    },
+
+    updateProfile: async (username, currentPassword, newPassword) => {
+        const response = await api.put('/auth/profile', {
+            username,
+            current_password: currentPassword,
+            new_password: newPassword,
+        });
+        return response.data;
+    },
 };
 
 // Dataset API
@@ -134,6 +148,11 @@ export const datasetAPI = {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(downloadUrl);
+    },
+
+    deleteDataset: async (datasetId) => {
+        const response = await api.delete(`/dataset/${datasetId}/delete`);
+        return response.data;
     },
 };
 

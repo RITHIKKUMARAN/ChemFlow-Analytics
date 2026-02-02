@@ -84,6 +84,9 @@ export default function UploadCSV({ onUploadSuccess }) {
                 {/* Grading Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
+                {/* Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent skew-x-12 translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out pointer-events-none" />
+
                 {uploading ? (
                     <>
                         <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />

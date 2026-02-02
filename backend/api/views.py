@@ -79,6 +79,74 @@ def login_user(request):
     }, status=status.HTTP_401_UNAUTHORIZED)
 
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    """
+    Update user profile (username, password)
+    PUT /api/auth/profile
+    """
+    user = request.user
+    username = request.data.get('username')
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+    
+    # Update username if provided
+    if username and username != user.username:
+        # Check if username is already taken
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exclude(id=user.id).exists():
+            return Response({
+                'error': 'Username already taken'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        user.username = username
+    
+    # Update password if provided
+    if new_password:
+        if not current_password:
+            return Response({
+                'error': 'Current password is required to set new password'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify current password
+        if not user.check_password(current_password):
+            return Response({
+                'error': 'Current password is incorrect'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(new_password)
+    
+    user.save()
+    
+    return Response({
+        'message': 'Profile updated successfully',
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+    }, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_profile(request):
+    """
+    Get current user profile
+    GET /api/auth/me
+    """
+    user = request.user
+    return Response({
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+    }, status=status.HTTP_200_OK)
+
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_csv(request):
@@ -205,6 +273,26 @@ def get_history(request):
     return Response({
         'datasets': serializer.data
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_dataset(request, dataset_id):
+    """
+    Delete a dataset
+    DELETE /api/dataset/<id>
+    """
+    try:
+        dataset = Dataset.objects.get(id=dataset_id, user=request.user)
+        dataset.delete()  # This will cascade delete all related equipment
+        
+        return Response({
+            'message': 'Dataset deleted successfully'
+        }, status=status.HTTP_200_OK)
+    except Dataset.DoesNotExist:
+        return Response({
+            'error': 'Dataset not found'
+        }, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
