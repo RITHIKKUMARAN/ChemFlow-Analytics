@@ -4,7 +4,7 @@ export default function DataTable({ data }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const totalPages = Math.ceil(data.length / itemsPerPage);
-    
+
     const paginatedData = data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -25,22 +25,22 @@ export default function DataTable({ data }) {
                 <table className="w-full">
                     <thead>
                         <tr className="border-b border-white/10">
-                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Equipment ID
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Type
                             </th>
-                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-right text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Flowrate
                             </th>
-                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-right text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Pressure
                             </th>
-                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="px-6 py-5 text-right text-sm font-bold text-slate-400 uppercase tracking-wider">
                                 Temperature
                             </th>
                         </tr>
@@ -53,31 +53,31 @@ export default function DataTable({ data }) {
                                     key={index}
                                     className="border-b border-white/5 hover:bg-white/5 transition-colors"
                                 >
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-5">
                                         <span
-                                            className="px-3 py-1 rounded-lg text-[11px] font-['JetBrains_Mono'] font-bold uppercase"
+                                            className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border-2"
                                             style={{
                                                 backgroundColor: statusStyle.bg,
                                                 color: statusStyle.text,
-                                                border: `1px solid ${statusStyle.border}`
+                                                borderColor: statusStyle.border // Changed to use explicitly defined border color for solid look
                                             }}
                                         >
                                             {item.status || 'Normal'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-['JetBrains_Mono'] text-white">
+                                    <td className="px-6 py-5 text-base font-mono font-medium text-white">
                                         {item.equipment_id}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-slate-300">
+                                    <td className="px-6 py-5 text-base font-medium text-slate-300">
                                         {item.equipment_type}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-cyan-400">
+                                    <td className="px-6 py-5 text-right text-base font-mono font-bold text-cyan-400">
                                         {item.flowrate?.toFixed(1)}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-purple-400">
+                                    <td className="px-6 py-5 text-right text-base font-mono font-bold text-purple-400">
                                         {item.pressure?.toFixed(1)}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-amber-400">
+                                    <td className="px-6 py-5 text-right text-base font-mono font-bold text-amber-400">
                                         {item.temperature?.toFixed(1)}
                                     </td>
                                 </tr>

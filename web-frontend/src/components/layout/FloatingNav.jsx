@@ -2,6 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../utils/api';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { Home, LayoutDashboard, LogIn, UserPlus, LogOut } from 'lucide-react';
+import chemflowLogo from '../../assets/chemflow-logo.png';
 
 export default function FloatingNav() {
     const navigate = useNavigate();
@@ -43,13 +45,13 @@ export default function FloatingNav() {
 
     const navItems = isAuthenticated
         ? [
-            { to: '/dashboard', label: 'Dashboard', icon: '🎯' },
-            { to: '/', label: 'Home', icon: '🏠' }
+            { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+            { to: '/', label: 'Home', icon: <Home className="w-4 h-4" /> }
         ]
         : [
-            { to: '/', label: 'Home', icon: '🏠' },
-            { to: '/login', label: 'Login', icon: '🔐' },
-            { to: '/register', label: 'Sign Up', icon: '✨' }
+            { to: '/', label: 'Home', icon: <Home className="w-4 h-4" /> },
+            { to: '/login', label: 'Login', icon: <LogIn className="w-4 h-4" /> },
+            { to: '/register', label: 'Sign Up', icon: <UserPlus className="w-4 h-4" /> }
         ];
 
     return (
@@ -61,11 +63,18 @@ export default function FloatingNav() {
         >
             <div className="glass-panel rounded-2xl px-6 py-3.5 flex items-center justify-between border border-white/10 shadow-2xl backdrop-blur-xl">
                 {/* Logo */}
-                <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-105">
-                        C
+                <div className="flex flex-row items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+                    {/* 3D Logo Image - Natural Render */}
+                    <div className="relative w-10 h-10 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(6,182,212,0.1)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        <img
+                            src={chemflowLogo}
+                            alt="ChemFlow Logo"
+                            className="relative w-full h-full object-contain p-0.5 group-hover:scale-105 transition-transform duration-500"
+                        />
                     </div>
-                    <span className="hidden sm:block font-['Space_Grotesk'] font-bold text-lg tracking-tight">
+                    <span className="hidden sm:flex font-display font-bold text-xl tracking-tight whitespace-nowrap items-center">
                         <span className="text-white">Chem</span>
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Flow</span>
                     </span>
@@ -78,18 +87,18 @@ export default function FloatingNav() {
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                `relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${isActive
-                                    ? 'text-white bg-white/10'
-                                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                `flex items-center gap-2 relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${isActive
+                                    ? 'text-white bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/10'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5'
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
-                                    <span className="mr-2">{item.icon}</span>
-                                    <span className="hidden sm:inline">{item.label}</span>
+                                    {item.icon}
+                                    <span className="hidden sm:inline whitespace-nowrap">{item.label}</span>
                                     {isActive && (
-                                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+                                        <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50" />
                                     )}
                                 </>
                             )}
@@ -99,10 +108,10 @@ export default function FloatingNav() {
                     {isAuthenticated && (
                         <button
                             onClick={handleSignOut}
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 transition-all duration-300"
+                            className="ml-2 px-5 py-2.5 rounded-full text-sm font-medium text-red-300 hover:text-white bg-red-500/5 hover:bg-red-500/20 border border-red-500/10 hover:border-red-500/40 transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center gap-2"
                         >
-                            <span className="mr-2">🚪</span>
-                            <span className="hidden sm:inline">Sign Out</span>
+                            <LogOut className="w-4 h-4" />
+                            <span className="hidden sm:inline whitespace-nowrap">Sign Out</span>
                         </button>
                     )}
                 </div>
