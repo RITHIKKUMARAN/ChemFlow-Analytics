@@ -51,10 +51,33 @@ export default function Dashboard() {
     // Live Telemetry Simulation - REMOVED
 
     const dashRef = useRef();
+    const sliderRef = useRef();
 
     useEffect(() => {
         loadData();
     }, []);
+
+    // Toggle Switch Animation (Elastic Snap)
+    useEffect(() => {
+        if (!sliderRef.current) return;
+        const is3D = viewMode === '3d';
+        // Container padding is 1.5 (6px). 
+        // Width of pill is roughly 50% - 6px.
+        // Target Left: 6px (0.375rem) vs 50%
+
+        const targetLeft = is3D ? '0.375rem' : '50%';
+
+        gsap.to(sliderRef.current, {
+            left: targetLeft,
+            duration: 0.5,
+            ease: "elastic.out(1, 0.6)",
+            // Add a slight stretch during movement for realism
+            keyframes: [
+                { scaleX: 1.1, duration: 0.2, ease: "power2.in" },
+                { scaleX: 1, duration: 0.3, ease: "elastic.out(1, 0.6)" }
+            ]
+        });
+    }, [viewMode]);
 
     useEffect(() => {
         let ctx;
@@ -384,39 +407,40 @@ export default function Dashboard() {
                     {/* Visualization */}
                     <div className="glass-panel rounded-2xl p-6 border border-white/10">
                         {/* Tabs */}
-                        {/* Tabs - Cylindrical Toggle Switch */}
-                        <div className="relative flex w-full mb-8 p-1.5 bg-[#0a0c10] rounded-full border border-white/10 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
-                            {/* Sliding Cylindrical Activator */}
+                        {/* Tabs - Centered & Compact with Flowing Background */}
+                        <div className="relative flex w-[340px] mx-auto mb-8 p-1.5 rounded-full border border-white/10 shadow-[0_0_20px_rgba(99,102,241,0.15)] backdrop-blur-xl bg-gradient-to-r from-indigo-900/40 via-purple-900/40 to-indigo-900/40 bg-[length:200%_auto] animate-[gradient_6s_linear_infinite]">
+                            {/* Animated Slider Pill */}
                             <div
-                                className={`absolute top-1.5 bottom-1.5 rounded-full shadow-lg transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0
+                                ref={sliderRef}
+                                className={`absolute top-1.5 bottom-1.5 rounded-full shadow-lg overflow-hidden z-0 w-[calc(50%-0.375rem)]
                                     ${viewMode === '3d'
-                                        ? 'left-1.5 w-[calc(50%-0.375rem)] bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/25'
-                                        : 'left-[50%] w-[calc(50%-0.375rem)] bg-gradient-to-r from-cyan-500 to-blue-600 shadow-cyan-500/25'
+                                        ? 'bg-gradient-to-r from-violet-700 to-indigo-600 shadow-indigo-500/25'
+                                        : 'bg-gradient-to-r from-sky-600 to-blue-700 shadow-blue-500/25'
                                     }`}
+                                style={{ left: viewMode === '3d' ? '0.375rem' : '50%' }}
                             >
-                                {/* Cylindrical Gloss/Shine */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-full" />
-                                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent rounded-full" />
+                                {/* Subtle Gloss */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
                             </div>
 
                             {/* 3D View Button */}
                             <button
                                 onClick={() => setViewMode('3d')}
-                                className={`flex-1 py-3 rounded-full text-sm font-bold transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === '3d' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+                                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === '3d' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
                                     }`}
                             >
-                                <Layers className={`w-4 h-4 transition-transform duration-500 ${viewMode === '3d' ? 'scale-110 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'scale-100'}`} />
-                                <span className={viewMode === '3d' ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : ''}>3D View</span>
+                                <Layers className="w-4 h-4" />
+                                <span>3D View</span>
                             </button>
 
                             {/* Analytics Button */}
                             <button
                                 onClick={() => setViewMode('charts')}
-                                className={`flex-1 py-3 rounded-full text-sm font-bold transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === 'charts' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+                                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === 'charts' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
                                     }`}
                             >
-                                <BarChart3 className={`w-4 h-4 transition-transform duration-500 ${viewMode === 'charts' ? 'scale-110 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'scale-100'}`} />
-                                <span className={viewMode === 'charts' ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : ''}>Analytics</span>
+                                <BarChart3 className="w-4 h-4" />
+                                <span>Analytics</span>
                             </button>
                         </div>
 
