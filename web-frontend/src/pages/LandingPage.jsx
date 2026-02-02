@@ -153,37 +153,27 @@ export default function LandingPage() {
                                 </div>
                             </button>
                         ) : (
-                            <>
-                                <button
-                                    onClick={() => navigate('/login')}
-                                    className="group relative inline-flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98]"
-                                >
-                                    {/* Surround Light/Depth Glow */}
-                                    <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-cyan-600/50 via-blue-500/50 to-teal-600/50 blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="group relative inline-flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98]"
+                            >
+                                {/* Surround Light/Depth Glow */}
+                                <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-cyan-600/50 via-blue-500/50 to-teal-600/50 blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                    <div className="relative px-11 py-5 bg-[#0f111a] rounded-full flex items-center gap-3 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
-                                        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none" />
+                                <div className="relative px-11 py-5 bg-[#0f111a] rounded-full flex items-center gap-3 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+                                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none" />
 
-                                        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/70 to-transparent blur-[1px]" />
+                                    <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/70 to-transparent blur-[1px]" />
 
-                                        <div className="relative flex items-center gap-3 z-10">
-                                            <div className="p-2 rounded-full bg-white/5 border border-white/10 shadow-inner group-hover:bg-cyan-500/20 transition-colors duration-300">
-                                                <LogIn className="w-5 h-5 text-cyan-300 group-hover:text-white transition-colors" />
-                                            </div>
-                                            <span className="text-lg font-medium text-slate-200 tracking-wide font-display group-hover:text-white transition-colors shadow-black drop-shadow-md">Login to Dashboard</span>
-                                            <ArrowRight className="w-5 h-5 text-cyan-300 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                    <div className="relative flex items-center gap-3 z-10">
+                                        <div className="p-2 rounded-full bg-white/5 border border-white/10 shadow-inner group-hover:bg-cyan-500/20 transition-colors duration-300">
+                                            <Rocket className="w-5 h-5 text-cyan-300 group-hover:text-white transition-colors" />
                                         </div>
+                                        <span className="text-lg font-medium text-slate-200 tracking-wide font-display group-hover:text-white transition-colors shadow-black drop-shadow-md">Launch Visualizer</span>
+                                        <ArrowRight className="w-5 h-5 text-cyan-300 group-hover:text-white group-hover:translate-x-1 transition-all" />
                                     </div>
-                                </button>
-
-                                <button
-                                    onClick={() => navigate('/register')}
-                                    className="px-10 py-4 rounded-xl border border-white/10 hover:border-purple-500/50 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all duration-300 backdrop-blur-md flex items-center gap-3 group"
-                                >
-                                    <Sparkles className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                                    <span>Create Account</span>
-                                </button>
-                            </>
+                                </div>
+                            </button>
                         )}
                     </div>
 

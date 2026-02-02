@@ -57,20 +57,21 @@ const CustomAxes = () => (
     </group>
 );
 
-const DataPoint = ({ position, status, data, size }) => {
+const DataPoint = ({ position, status, data, size, fixedColor }) => {
     const mesh = useRef();
     const [hovered, setHover] = useState(false);
 
     const color = useMemo(() => {
+        if (fixedColor) return fixedColor;
         if (status === 'Critical') return '#fb7185';
         if (status === 'Warning') return '#facc15';
         return '#34d399';
-    }, [status]);
+    }, [status, fixedColor]);
 
     useFrame((state) => {
         if (mesh.current) {
             // Pulse effect for critical nodes
-            if (status === 'Critical') {
+            if (status === 'Critical' && !fixedColor) {
                 const s = size + Math.sin(state.clock.elapsedTime * 6) * 0.1;
                 mesh.current.scale.setScalar(s);
             }
@@ -102,7 +103,7 @@ const DataPoint = ({ position, status, data, size }) => {
                         emissive={color}
                         emissiveIntensity={hovered ? 2 : 0.5}
                         transparent
-                        opacity={0.9}
+                        opacity={fixedColor ? 0.6 : 0.9}
                         roughness={0.1}
                         metalness={0.1}
                         clearcoat={1}
@@ -128,7 +129,7 @@ const DataPoint = ({ position, status, data, size }) => {
                                 {data.equipment_id}
                             </span>
                             <span className="font-bold text-[10px] uppercase tracking-wider" style={{ color: color }}>
-                                {status?.toUpperCase() || 'NORMAL'}
+                                {fixedColor ? (fixedColor === '#f87171' ? 'BASELINE' : 'CURRENT') : (status?.toUpperCase() || 'NORMAL')}
                             </span>
                         </div>
 
@@ -159,16 +160,13 @@ const DataPoint = ({ position, status, data, size }) => {
     );
 };
 
-export default function DataVis3D({ data }) {
-    if (!data || data.length === 0) return null;
-
-    const normalizedData = useMemo(() => {
+// Helper to normalize data for 3D space
+const useNormalizedData = (data) => {
+    return useMemo(() => {
+        if (!data || data.length === 0) return [];
         const validData = data.filter(d =>
-            typeof d.flowrate === 'number' &&
-            typeof d.pressure === 'number' &&
-            typeof d.temperature === 'number'
+            typeof d.flowrate === 'number' && typeof d.pressure === 'number' && typeof d.temperature === 'number'
         );
-
         if (validData.length === 0) return [];
 
         const flows = validData.map(d => d.flowrate);
@@ -184,16 +182,20 @@ export default function DataVis3D({ data }) {
         const rangePress = maxPress - minPress || 1;
 
         return validData.map(d => {
-            // Map data to roughly -5 to 5 range centered
             const x = ((d.pressure - minPress) / rangePress) * 10 - 5;
             const y = ((d.temperature - minTemp) / rangeTemp) * 10 - 5;
             const z = ((d.flowrate - minFlow) / rangeFlow) * 10 - 5;
-            // Size based on Flowrate significance
             const size = 0.3 + ((d.flowrate - minFlow) / rangeFlow) * 0.4;
-
             return { ...d, position: [x, y, z], size };
         });
     }, [data]);
+};
+
+export default function DataVis3D({ data, comparisonData }) {
+    if (!data || data.length === 0) return null;
+
+    const normalizedData = useNormalizedData(data);
+    const normalizedCompareData = useNormalizedData(comparisonData);
 
     return (
         <div className="w-full h-[600px] rounded-2xl overflow-hidden relative bg-[#0a0a0f] border border-white/10 shadow-2xl">
@@ -213,18 +215,33 @@ export default function DataVis3D({ data }) {
             {/* Legend Overlay */}
             <div className="absolute bottom-5 left-5 z-10 pointer-events-none bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/5">
                 <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                        <span className="text-[10px] text-slate-300 font-mono">NORMAL</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-amber-400" />
-                        <span className="text-[10px] text-slate-300 font-mono">WARNING</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
-                        <span className="text-[10px] text-slate-300 font-mono">CRITICAL</span>
-                    </div>
+                    {comparisonData ? (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                                <span className="text-[10px] text-slate-300 font-mono">CURRENT DATASET</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-red-400" />
+                                <span className="text-[10px] text-slate-300 font-mono">BASELINE (OLD)</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                                <span className="text-[10px] text-slate-300 font-mono">NORMAL</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-amber-400" />
+                                <span className="text-[10px] text-slate-300 font-mono">WARNING</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
+                                <span className="text-[10px] text-slate-300 font-mono">CRITICAL</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -248,7 +265,7 @@ export default function DataVis3D({ data }) {
 
                 <OrbitControls
                     enableZoom={true}
-                    autoRotate
+                    autoRotate={!comparisonData} // Stop rotate on compare to make it easier to see
                     autoRotateSpeed={0.8}
                     enablePan={false}
                     minDistance={5}
@@ -259,13 +276,27 @@ export default function DataVis3D({ data }) {
                 <CustomAxes />
 
                 <group>
-                    {normalizedData.map((item, index) => (
+                    {/* Comparison Baseline (RED) */}
+                    {comparisonData && normalizedCompareData.map((item, index) => (
                         <DataPoint
-                            key={index}
+                            key={`old-${index}`}
                             position={item.position}
                             status={item.status || 'Normal'}
                             data={item}
                             size={item.size}
+                            fixedColor="#f87171"
+                        />
+                    ))}
+
+                    {/* Current Dataset (Green or Normal) */}
+                    {normalizedData.map((item, index) => (
+                        <DataPoint
+                            key={`new-${index}`}
+                            position={item.position}
+                            status={item.status || 'Normal'}
+                            data={item}
+                            size={item.size}
+                            fixedColor={comparisonData ? '#4ade80' : null}
                         />
                     ))}
                 </group>
