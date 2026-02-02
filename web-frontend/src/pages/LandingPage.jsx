@@ -4,6 +4,9 @@ import { authAPI } from '../utils/api';
 import gsap from 'gsap';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
+import { Rocket, ArrowRight, LayoutDashboard, LogIn, Sparkles, Github, Globe } from 'lucide-react';
+
+import chemflowLogo from '../assets/chemflow-logo.png';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -13,12 +16,21 @@ export default function LandingPage() {
     const subtitleRef = useRef();
     const ctaRef = useRef();
     const statsRef = useRef();
+    const logoRef = useRef();
 
     useEffect(() => {
         setIsAuthenticated(authAPI.isAuthenticated());
 
         let ctx = gsap.context(() => {
             const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+            // Logo Animation
+            if (logoRef.current) {
+                tl.fromTo(logoRef.current,
+                    { opacity: 0, scale: 0.5, rotate: -20 },
+                    { opacity: 1, scale: 1, rotate: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }
+                );
+            }
 
             // Title letter animation
             if (titleRef.current) {
@@ -41,7 +53,7 @@ export default function LandingPage() {
                     rotation: 0,
                     stagger: 0.03,
                     duration: 0.8
-                });
+                }, "-=1.0"); // Overlap with logo
             }
 
             // Subtitle
@@ -85,25 +97,20 @@ export default function LandingPage() {
             >
                 <div className="relative z-10 max-w-6xl mx-auto text-center">
                     {/* Eyebrow */}
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-panel mb-8 animate-float">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-glow shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
-                        <span className="text-sm font-medium text-cyan-200 tracking-wider uppercase font-['JetBrains_Mono']">
-                            Next-Gen Chemical Analytics
-                        </span>
-                    </div>
+
 
                     {/* Headline */}
                     <h1 className="mb-6">
                         <div
                             ref={titleRef}
-                            className="font-['Space_Grotesk'] font-bold text-7xl sm:text-8xmlg:text-9xl tracking-tight text-white mb-2"
+                            className="font-display font-bold text-7xl sm:text-8xl lg:text-9xl tracking-tight text-white mb-2"
                             style={{
                                 textShadow: '0 4px 20px rgba(139, 92, 246, 0.4), 0 0 60px rgba(6, 182, 212, 0.2)'
                             }}
                         >
                             ChemFlow
                         </div>
-                        <div className="font-['Space_Grotesk'] font-bold text-4xl sm:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400">
+                        <div className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400">
                             Real-time Analytics
                         </div>
                     </h1>
@@ -123,30 +130,58 @@ export default function LandingPage() {
                         {isAuthenticated ? (
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="btn-primary text-base px-10 py-4 flex items-center gap-3 group text-lg shadow-[0_0_30px_rgba(124,58,237,0.5)]"
+                                className="group relative inline-flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98]"
                             >
-                                <span>🚀 Enter Mission Control</span>
-                                <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
+                                {/* Surround Light/Depth Glow */}
+                                <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-violet-600/50 via-indigo-500/50 to-purple-600/50 blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                {/* Button Body - Dark Professional Grading */}
+                                <div className="relative px-11 py-5 bg-[#0f111a] rounded-full flex items-center gap-3 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+                                    {/* Cylindrical Highlight (Top) */}
+                                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none" />
+
+                                    {/* Rim Light (Bottom) */}
+                                    <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-violet-500/70 to-transparent blur-[1px]" />
+
+                                    <div className="relative flex items-center gap-3 z-10">
+                                        <div className="p-2 rounded-full bg-white/5 border border-white/10 shadow-inner group-hover:bg-violet-500/20 transition-colors duration-300">
+                                            <LayoutDashboard className="w-5 h-5 text-indigo-300 group-hover:text-white transition-colors" />
+                                        </div>
+                                        <span className="text-lg font-medium text-slate-200 tracking-wide font-display group-hover:text-white transition-colors shadow-black drop-shadow-md">Enter Mission Control</span>
+                                        <ArrowRight className="w-5 h-5 text-indigo-300 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                    </div>
+                                </div>
                             </button>
                         ) : (
                             <>
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="btn-primary text-base px-8 py-4 flex items-center gap-3 group"
+                                    className="group relative inline-flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98]"
                                 >
-                                    <span>🔐 Login to Dashboard</span>
-                                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
+                                    {/* Surround Light/Depth Glow */}
+                                    <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-cyan-600/50 via-blue-500/50 to-teal-600/50 blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                    <div className="relative px-11 py-5 bg-[#0f111a] rounded-full flex items-center gap-3 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+                                        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none" />
+
+                                        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/70 to-transparent blur-[1px]" />
+
+                                        <div className="relative flex items-center gap-3 z-10">
+                                            <div className="p-2 rounded-full bg-white/5 border border-white/10 shadow-inner group-hover:bg-cyan-500/20 transition-colors duration-300">
+                                                <LogIn className="w-5 h-5 text-cyan-300 group-hover:text-white transition-colors" />
+                                            </div>
+                                            <span className="text-lg font-medium text-slate-200 tracking-wide font-display group-hover:text-white transition-colors shadow-black drop-shadow-md">Login to Dashboard</span>
+                                            <ArrowRight className="w-5 h-5 text-cyan-300 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                    </div>
                                 </button>
 
                                 <button
                                     onClick={() => navigate('/register')}
-                                    className="glass-panel text-white px-8 py-4 rounded-xl border border-white/10 font-semibold hover:border-purple-500/50 transition-all hover:bg-white/5"
+                                    className="px-10 py-4 rounded-xl border border-white/10 hover:border-purple-500/50 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all duration-300 backdrop-blur-md flex items-center gap-3 group"
                                 >
-                                    ✨ Create Account
+                                    <Sparkles className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                                    <span>Create Account</span>
                                 </button>
                             </>
                         )}
@@ -159,21 +194,73 @@ export default function LandingPage() {
                             { value: '<1ms', label: 'Response', color: '#22d3ee' },
                             { value: 'AI', label: 'Powered', color: '#34d399' }
                         ].map((stat, i) => (
-                            <div key={i} className="text-center">
+                            <div key={i} className="text-center group cursor-default">
                                 <div
-                                    className="text-4xl sm:text-5xl font-bold font-['JetBrains_Mono'] mb-2"
+                                    className="text-5xl sm:text-6xl font-bold font-mono mb-2 group-hover:scale-110 transition-transform duration-300"
                                     style={{
                                         color: stat.color,
-                                        textShadow: `0 0 20px ${stat.color}60`
+                                        textShadow: `0 0 30px ${stat.color}60`
                                     }}
                                 >
                                     {stat.value}
                                 </div>
-                                <div className="text-xs text-slate-400 uppercase tracking-widest font-['JetBrains_Mono']">
+                                <div className="text-sm font-bold text-slate-400 uppercase tracking-widest font-mono">
                                     {stat.label}
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* Developer Credits - Dynamic Depth & Hover Effects */}
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-6 animate-fade-in-up z-50">
+                    <div className="group relative hover:scale-105 transition-transform duration-500 ease-out cursor-default">
+                        {/* Dynamic Floating Animation */}
+                        <div className="animate-float">
+                            {/* Dynamic Ambient Glow (Pulses on Hover) */}
+                            <div className="absolute -inset-4 bg-gradient-to-r from-violet-600/0 via-violet-600/40 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700 w-full mx-auto" />
+
+                            {/* Rotating Gradient Border */}
+                            <div className="relative p-[1px] rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-white/50 transition-colors duration-500 overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-400/30 to-transparent translate-x-[-100%] group-hover:animate-[gradient_3s_linear_infinite]" />
+
+                                {/* Main Content Pill */}
+                                <div className="relative flex items-center gap-4 p-2 pr-6 rounded-full bg-[#0a0a12]/90 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/50 group-hover:shadow-[0_10px_40px_-5px_rgba(124,58,237,0.3)] transition-all duration-500">
+
+                                    {/* Inner Shine Effect */}
+                                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-60" />
+                                    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/40 to-transparent opacity-40" />
+
+                                    <span className="pl-3 text-sm font-medium text-slate-400 group-hover:text-slate-200 transition-colors duration-300">
+                                        Built by <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400 font-bold group-hover:from-violet-300 group-hover:to-cyan-300 group-hover:drop-shadow-[0_0_10px_rgba(167,139,250,0.5)] transition-all duration-300">Rithik Kumaran K</span>
+                                    </span>
+
+                                    <div className="h-4 w-[1px] bg-white/10 group-hover:bg-white/30 transition-colors" />
+
+                                    <div className="flex gap-2">
+                                        <a
+                                            href="https://github.com/RITHIKKUMARAN"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full bg-white/5 hover:bg-black border border-white/5 hover:border-white/30 transition-all duration-300 group/icon relative overflow-hidden hover:-translate-y-1 hover:shadow-lg hover:shadow-white/10"
+                                            aria-label="GitHub Profile"
+                                        >
+                                            <Github className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors relative z-10" />
+                                        </a>
+
+                                        <a
+                                            href="https://rithikkumarank-portfolio.vercel.app/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full bg-white/5 hover:bg-violet-600 border border-white/5 hover:border-white/30 transition-all duration-300 group/icon relative overflow-hidden hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-500/20"
+                                            aria-label="Portfolio"
+                                        >
+                                            <Globe className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors relative z-10" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

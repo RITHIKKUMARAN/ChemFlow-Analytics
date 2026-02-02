@@ -2,6 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { datasetAPI, authAPI } from '../utils/api';
 import gsap from 'gsap';
+import {
+    Activity,
+    Wind,
+    Droplets,
+    Thermometer,
+    Download,
+    Box,
+    BarChart3,
+    Layers
+} from 'lucide-react';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
 import UploadCSV from '../components/UploadCSV';
@@ -85,7 +95,7 @@ export default function Dashboard() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-glow shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
-                            <h1 className="text-4xl font-['Space_Grotesk'] font-bold text-white">
+                            <h1 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight">
                                 Mission Control
                             </h1>
                         </div>
@@ -95,20 +105,13 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex gap-3 mt-4 lg:mt-0 items-center">
-                        <button
-                            onClick={handleSignOut}
-                            className="glass-panel px-5 py-2.5 rounded-xl text-sm font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 border border-red-500/10 hover:border-red-500/30 transition-all flex items-center gap-2"
-                        >
-                            <span>🚪</span>
-                            <span className="hidden sm:inline">Sign Out</span>
-                        </button>
-
                         {statistics && (
                             <button
                                 onClick={() => datasetAPI.downloadPDF(datasetId)}
-                                className="glass-panel px-5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50 transition-all"
+                                className="group relative px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-md flex items-center gap-2"
                             >
-                                📥 Export PDF
+                                <Download className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                                <span className="font-medium text-sm">Export Report</span>
                             </button>
                         )}
                         <UploadCSV onUploadSuccess={loadData} />
@@ -123,28 +126,28 @@ export default function Dashboard() {
                             value={statistics.total_equipment}
                             unit="nodes"
                             color="#a78bfa"
-                            icon="🎯"
+                            icon={<Box className="w-6 h-6" />}
                         />
                         <MetricCard
                             label="Avg Pressure"
                             value={statistics.avg_pressure.toFixed(1)}
                             unit="bar"
                             color="#22d3ee"
-                            icon="⚡"
+                            icon={<Activity className="w-6 h-6" />}
                         />
                         <MetricCard
                             label="Avg Flowrate"
                             value={statistics.avg_flowrate.toFixed(1)}
                             unit="m³/h"
                             color="#34d399"
-                            icon="💧"
+                            icon={<Droplets className="w-6 h-6" />}
                         />
                         <MetricCard
                             label="Avg Temp"
                             value={statistics.avg_temperature.toFixed(1)}
                             unit="°C"
                             color="#f472b6"
-                            icon="🔥"
+                            icon={<Thermometer className="w-6 h-6" />}
                         />
                     </div>
                 )}
@@ -157,21 +160,23 @@ export default function Dashboard() {
                         <div className="flex gap-2 mb-6">
                             <button
                                 onClick={() => setViewMode('3d')}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === '3d'
-                                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${viewMode === '3d'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
-                                🌌 3D View
+                                <Layers className="w-4 h-4" />
+                                3D View
                             </button>
                             <button
                                 onClick={() => setViewMode('charts')}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'charts'
-                                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${viewMode === 'charts'
+                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
-                                📊 Analytics
+                                <BarChart3 className="w-4 h-4" />
+                                Analytics
                             </button>
                         </div>
 
@@ -186,7 +191,9 @@ export default function Dashboard() {
                             {!statistics && (
                                 <div className="h-[500px] flex items-center justify-center">
                                     <div className="text-center">
-                                        <div className="text-6xl mb-4">📊</div>
+                                        <div className="inline-flex justify-center items-center w-20 h-20 rounded-full bg-white/5 mb-4">
+                                            <BarChart3 className="w-10 h-10 text-slate-500" />
+                                        </div>
                                         <p className="text-slate-400 font-medium">
                                             Upload a dataset to begin analysis
                                         </p>
@@ -200,7 +207,7 @@ export default function Dashboard() {
                     {equipmentData.length > 0 && (
                         <div className="glass-panel rounded-2xl overflow-hidden border border-white/10">
                             <div className="p-5 border-b border-white/10 flex justify-between items-center">
-                                <h3 className="font-['Space_Grotesk'] font-bold text-lg text-white">
+                                <h3 className="font-display font-bold text-xl text-white">
                                     Equipment Data Stream
                                 </h3>
                                 <span className="text-xs font-['JetBrains_Mono'] text-cyan-400">
@@ -220,7 +227,7 @@ function MetricCard({ label, value, unit, color, icon }) {
     return (
         <div className="metric-card glass-panel p-6 rounded-xl border border-white/10 group hover:border-white/20 transition-all cursor-default">
             <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{icon}</span>
+                <span className="text-white/80">{icon}</span>
                 <div
                     className="px-2 py-1 rounded-lg text-[10px] font-['JetBrains_Mono'] font-bold uppercase"
                     style={{
@@ -231,18 +238,18 @@ function MetricCard({ label, value, unit, color, icon }) {
                     {unit}
                 </div>
             </div>
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 font-['JetBrains_Mono']">
+            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                 {label}
             </div>
             <div
-                className="text-4xl font-bold font-['JetBrains_Mono'] group-hover:scale-105 transition-transform origin-left"
+                className="text-5xl font-bold font-mono group-hover:scale-105 transition-transform origin-left tracking-tighter"
                 style={{
                     color: color,
-                    textShadow: `0 0 20px ${color}60`
+                    textShadow: `0 0 30px ${color}40`
                 }}
             >
                 {value}
             </div>
-        </div>
+        </div >
     );
 }
