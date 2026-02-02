@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { datasetAPI } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
+import { datasetAPI, authAPI } from '../utils/api';
 import gsap from 'gsap';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
@@ -9,6 +10,7 @@ import DataTable from '../components/DataTable';
 import DataVis3D from '../components/canvas/DataVis3D';
 
 export default function Dashboard() {
+    const navigate = useNavigate();
     const [statistics, setStatistics] = useState(null);
     const [equipmentData, setEquipmentData] = useState([]);
     const [history, setHistory] = useState([]);
@@ -33,9 +35,7 @@ export default function Dashboard() {
                         stagger: 0.1,
                         duration: 0.8,
                         ease: 'power3.out',
-                        clearProps: 'transform' // Keep opacity fully controlled or clear it? Better to clear transform, keep opacity 1. 
-                        // Actually, 'all' is safer if CSS handles the rest, but we want to ensure opacity 1.
-                        // Let's just animate to opacity 1.
+                        clearProps: 'transform'
                     }
                 );
 
@@ -69,6 +69,11 @@ export default function Dashboard() {
         }
     };
 
+    const handleSignOut = () => {
+        authAPI.logout();
+        navigate('/');
+    };
+
     return (
         <div className="relative min-h-screen overflow-x-hidden" ref={dashRef}>
             <Scene />
@@ -89,7 +94,15 @@ export default function Dashboard() {
                         </p>
                     </div>
 
-                    <div className="flex gap-3 mt-4 lg:mt-0">
+                    <div className="flex gap-3 mt-4 lg:mt-0 items-center">
+                        <button
+                            onClick={handleSignOut}
+                            className="glass-panel px-5 py-2.5 rounded-xl text-sm font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 border border-red-500/10 hover:border-red-500/30 transition-all flex items-center gap-2"
+                        >
+                            <span>🚪</span>
+                            <span className="hidden sm:inline">Sign Out</span>
+                        </button>
+
                         {statistics && (
                             <button
                                 onClick={() => datasetAPI.downloadPDF(datasetId)}
@@ -145,8 +158,8 @@ export default function Dashboard() {
                             <button
                                 onClick={() => setViewMode('3d')}
                                 className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === '3d'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 🌌 3D View
@@ -154,8 +167,8 @@ export default function Dashboard() {
                             <button
                                 onClick={() => setViewMode('charts')}
                                 className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'charts'
-                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 📊 Analytics

@@ -7,7 +7,7 @@ import FloatingNav from '../components/layout/FloatingNav';
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,13 +15,17 @@ export default function LoginPage() {
 
     useEffect(() => {
         let ctx = gsap.context(() => {
-            gsap.from(cardRef.current, {
-                opacity: 0,
-                y: 40,
-                scale: 0.95,
-                duration: 1,
-                ease: 'power3.out'
-            });
+            gsap.fromTo(cardRef.current,
+                { opacity: 0, y: 40, scale: 0.95 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 1,
+                    ease: 'power3.out',
+                    clearProps: 'transform'
+                }
+            );
         }, cardRef);
 
         return () => ctx.revert();
@@ -33,7 +37,8 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await authAPI.login({ email, password });
+            // Correctly pass username and password as separate arguments
+            await authAPI.login(username, password);
 
             // Success animation
             gsap.to(cardRef.current, {
@@ -48,7 +53,8 @@ export default function LoginPage() {
             // Error shake
             gsap.to(cardRef.current, {
                 x: [-10, 10, -10, 10, 0],
-                duration: 0.4
+                duration: 0.4,
+                clearProps: 'x'
             });
         } finally {
             setLoading(false);
@@ -72,7 +78,7 @@ export default function LoginPage() {
                     {/* Header */}
                     <div className="mb-8 text-center">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/20">
-                            <span className="text-3xl">🔐</span>
+                            <span className="text-3xl">👋</span>
                         </div>
                         <h1 className="text-3xl font-['Space_Grotesk'] font-bold text-white mb-2">
                             Welcome Back
@@ -93,14 +99,14 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Email
+                                Username
                             </label>
                             <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="input-glass w-full"
-                                placeholder="your@email.com"
+                                placeholder="johndoe"
                                 required
                             />
                         </div>

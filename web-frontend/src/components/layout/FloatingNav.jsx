@@ -18,15 +18,22 @@ export default function FloatingNav() {
     }, []);
 
     useEffect(() => {
-        if (navRef.current) {
-            gsap.from(navRef.current, {
-                y: -100,
-                opacity: 0,
-                duration: 1,
-                ease: 'power3.out',
-                delay: 0.2
-            });
-        }
+        let ctx = gsap.context(() => {
+            if (navRef.current) {
+                gsap.killTweensOf(navRef.current); // Kill any existing animations
+                gsap.fromTo(navRef.current,
+                    { y: -100, opacity: 0 },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1,
+                        ease: 'power3.out',
+                        clearProps: 'transform' // Clear transform after animation to allow CSS to handle sticking
+                    }
+                );
+            }
+        }, navRef);
+        return () => ctx.revert();
     }, []);
 
     const handleSignOut = () => {
@@ -48,14 +55,14 @@ export default function FloatingNav() {
     return (
         <nav
             ref={navRef}
-            className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${isScrolled ? 'top-2' : 'top-6'
+            className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out ${isScrolled ? 'top-2 scale-[0.98]' : 'top-6 scale-100'
                 }`}
             style={{ width: 'calc(100% - 2rem)', maxWidth: '800px' }}
         >
-            <div className="glass-panel rounded-2xl px-6 py-3.5 flex items-center justify-between">
+            <div className="glass-panel rounded-2xl px-6 py-3.5 flex items-center justify-between border border-white/10 shadow-2xl backdrop-blur-xl">
                 {/* Logo */}
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/20">
+                <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-105">
                         C
                     </div>
                     <span className="hidden sm:block font-['Space_Grotesk'] font-bold text-lg tracking-tight">

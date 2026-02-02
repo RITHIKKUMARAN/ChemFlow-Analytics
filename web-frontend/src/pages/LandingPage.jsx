@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { authAPI } from '../utils/api';
 import gsap from 'gsap';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const heroRef = useRef();
     const titleRef = useRef();
     const subtitleRef = useRef();
@@ -13,6 +15,8 @@ export default function LandingPage() {
     const statsRef = useRef();
 
     useEffect(() => {
+        setIsAuthenticated(authAPI.isAuthenticated());
+
         let ctx = gsap.context(() => {
             const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
@@ -40,24 +44,30 @@ export default function LandingPage() {
                 });
             }
 
-            tl.from(subtitleRef.current, {
-                opacity: 0,
-                y: 30,
-                duration: 1
-            }, '-=0.4')
-                .from(ctaRef.current?.children || [], {
-                    opacity: 0,
-                    y: 20,
-                    scale: 0.95,
-                    duration: 0.6,
-                    stagger: 0.1
-                }, '-=0.5')
-                .from(statsRef.current?.children || [], {
-                    opacity: 0,
-                    y: 20,
-                    duration: 0.6,
-                    stagger: 0.1
-                }, '-=0.3');
+            // Subtitle
+            tl.fromTo(subtitleRef.current,
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
+                '-=0.4'
+            );
+
+            // CTAs
+            if (ctaRef.current?.children) {
+                tl.fromTo(ctaRef.current.children,
+                    { opacity: 0, y: 20, scale: 0.95 },
+                    { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.7)' },
+                    '-=0.5'
+                );
+            }
+
+            // Stats
+            if (statsRef.current?.children) {
+                tl.fromTo(statsRef.current.children,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out' },
+                    '-=0.3'
+                );
+            }
         }, heroRef);
 
         return () => ctx.revert();
@@ -110,22 +120,36 @@ export default function LandingPage() {
 
                     {/* CTAs */}
                     <div ref={ctaRef} className="flex flex-wrap gap-4 justify-center mb-16">
-                        <button
-                            onClick={() => navigate('/register')}
-                            className="btn-primary text-base px-8 py-4 flex items-center gap-3 group"
-                        >
-                            <span>Start Analyzing</span>
-                            <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </button>
+                        {isAuthenticated ? (
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="btn-primary text-base px-10 py-4 flex items-center gap-3 group text-lg shadow-[0_0_30px_rgba(124,58,237,0.5)]"
+                            >
+                                <span>🚀 Enter Mission Control</span>
+                                <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="btn-primary text-base px-8 py-4 flex items-center gap-3 group"
+                                >
+                                    <span>🔐 Login to Dashboard</span>
+                                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </button>
 
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="glass-panel text-white px-8 py-4 rounded-xl border border-white/10 font-semibold hover:border-purple-500/50 transition-all"
-                        >
-                            Sign In
-                        </button>
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="glass-panel text-white px-8 py-4 rounded-xl border border-white/10 font-semibold hover:border-purple-500/50 transition-all hover:bg-white/5"
+                                >
+                                    ✨ Create Account
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     {/* Stats */}
