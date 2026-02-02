@@ -136,10 +136,10 @@ export const aiHelper = {
                 USER QUESTION: "${question}"
 
                 INSTRUCTIONS:
-                1. Answer ONLY based on the provided context or general chemical engineering principles related to it.
-                2. Do not answer general knowledge questions (e.g., "What is the capital of France?").
-                3. Keep answers concise, professional, and technical.
-                4. If the question is irrelevant to the data/app, reply: "Access Denied: Inquiry outside operational parameters."
+                1. Answer questions based on the provided equipment data or chemical engineering principles.
+                2. If the input is a greeting or pleasantry (e.g., "Hi", "Thanks", "Bye"), generic polite responses are ALLOWED. Do not reject them.
+                3. If the question is UNRELATED to the plant/data (e.g. politics, movies), reply: "This topic is not relevant to our application. Please discuss your chemical equipment data so I can assist you."
+                4. Keep technical answers concise and professional.
             `;
 
             const result = await model.generateContent(prompt);

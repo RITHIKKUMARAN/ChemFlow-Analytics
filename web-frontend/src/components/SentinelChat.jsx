@@ -208,21 +208,31 @@ export default function SentinelChat({ equipmentData }) {
                 className={`fixed top-24 bottom-24 right-6 w-96 z-40 flex flex-col glass-panel border border-cyan-500/30 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden transform transition-transform duration-300 ${!open ? 'translate-x-[120%]' : ''}`}
                 style={{ display: open ? 'flex' : 'none' }} // Replaced visibility logic with style for GSAP
             >
-                {/* Header */}
-                <div className="p-4 border-b border-white/10 bg-black/40 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50">
-                            <Bot className="w-5 h-5 text-cyan-400" />
+                {/* Header - Live Reactor */}
+                <div className="p-4 border-b border-indigo-500/30 bg-gradient-to-r from-blue-950/90 to-indigo-950/90 backdrop-blur-md flex justify-between items-center relative overflow-hidden">
+                    {/* Top Line */}
+                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-cyan-500 via-indigo-500 to-transparent opacity-50" />
+
+                    <div className="flex items-center gap-4">
+                        {/* Live Reactor Avatar */}
+                        <div className="w-10 h-10 rounded-xl bg-black/80 flex items-center justify-center relative shadow-[0_0_15px_rgba(34,211,238,0.3)] border border-cyan-500/50 overflow-hidden">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.2),transparent)]" />
+                            {/* Rings */}
+                            <div className="absolute w-7 h-7 rounded-full border-[1.5px] border-cyan-400 border-t-transparent animate-[spin_3s_linear_infinite]" />
+                            <div className="absolute w-5 h-5 rounded-full border-[1.5px] border-indigo-400 border-b-transparent animate-[spin_2s_linear_infinite_reverse]" />
+                            {/* Core */}
+                            <div className="w-1.5 h-1.5 bg-cyan-100 rounded-full shadow-[0_0_8px_cyan] animate-pulse" />
                         </div>
+
                         <div>
-                            <h3 className="text-sm font-bold text-white font-display tracking-wider">SENTINEL AI</h3>
+                            <h3 className="text-sm font-bold text-cyan-50 font-display tracking-wider">SENTINEL AI</h3>
                             <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                 ONLINE
                             </span>
                         </div>
                     </div>
-                    <Cpu className="w-4 h-4 text-slate-500" />
+                    <Cpu className="w-4 h-4 text-indigo-400" />
                 </div>
 
                 {/* Messages Area - Diagnostics Removed */}

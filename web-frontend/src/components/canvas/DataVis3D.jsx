@@ -25,14 +25,14 @@ const AxisLabel = ({ position, label, color }) => (
 
 const CustomAxes = () => (
     <group>
-        {/* Floor Grid (XZ) */}
-        <gridHelper args={[12, 12, '#a78bfa30', '#a78bfa10']} position={[0, -5, 0]} />
+        {/* Floor Grid (XZ) - Violet */}
+        <gridHelper args={[12, 12, '#5b21b6', '#2e1065']} position={[0, -5, 0]} />
 
-        {/* Back Wall Grid (XY) */}
-        <gridHelper args={[12, 12, '#f472b630', '#f472b610']} position={[0, 1, -6]} rotation={[Math.PI / 2, 0, 0]} />
+        {/* Back Wall Grid (XY) - Pink */}
+        <gridHelper args={[12, 12, '#db2777', '#831843']} position={[0, 1, -6]} rotation={[Math.PI / 2, 0, 0]} />
 
-        {/* Side Wall Grid (YZ) */}
-        <gridHelper args={[12, 12, '#22d3ee30', '#22d3ee10']} position={[-6, 1, 0]} rotation={[0, 0, Math.PI / 2]} />
+        {/* Side Wall Grid (YZ) - Cyan */}
+        <gridHelper args={[12, 12, '#0891b2', '#164e63']} position={[-6, 1, 0]} rotation={[0, 0, Math.PI / 2]} />
 
         {/* Thick Axis Lines at Bounds */}
         {/* X Axis - Pressure */}
