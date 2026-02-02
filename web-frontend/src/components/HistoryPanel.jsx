@@ -1,71 +1,63 @@
-import gsap from 'gsap';
 import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 
-export default function HistoryPanel({ history, onSelectDataset, currentDatasetId }) {
-    const listRef = useRef(null);
+export default function HistoryPanel({ history, currentDatasetId, onSelectDataset }) {
+    const panelRef = useRef();
 
     useEffect(() => {
-        if (history.length) {
-            gsap.from(listRef.current.children, {
+        if (panelRef.current && history.length > 0) {
+            gsap.from('.history-item', {
                 opacity: 0,
-                x: -10,
-                duration: 0.4,
-                stagger: 0.05
+                x: -20,
+                stagger: 0.05,
+                duration: 0.5,
+                ease: 'power2.out'
             });
         }
     }, [history]);
 
-    return (
-        <div className="surface-card flex flex-col" style={{ height: '100%', maxHeight: '600px' }}>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-subtle)' }}>
-                <h3 style={{ fontSize: '1rem' }}>Dataset Logs</h3>
-                <div className="text-label text-secondary">RECENT UPLOADS</div>
+    if (!history || history.length === 0) {
+        return (
+            <div className="p-6 text-center">
+                <div className="text-4xl mb-3 opacity-50">📂</div>
+                <p className="text-slate-500 text-sm">No upload history yet</p>
             </div>
+        );
+    }
 
-            <div className="overflow-auto custom-scrollbar" style={{ flexGrow: 1, padding: '0.5rem' }}>
-                <ul ref={listRef} className="flex flex-col gap-1">
-                    {history.map((dataset) => {
-                        const isActive = dataset.id === currentDatasetId;
-                        return (
-                            <li
-                                key={dataset.id}
-                                onClick={() => onSelectDataset(dataset.id)}
-                                style={{
-                                    padding: '12px 16px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    background: isActive ? 'var(--bg-surface-hover)' : 'transparent',
-                                    border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
-                                    transition: 'all 0.2s ease'
-                                }}
-                                className="hover:bg-active"
-                            >
-                                <div className="text-secondary text-mono" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
-                                    {new Date(dataset.upload_timestamp).toLocaleDateString()}
-                                </div>
-                                <div style={{
-                                    fontFamily: 'var(--font-heading)',
-                                    color: isActive ? 'var(--color-accent)' : 'inherit',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
-                                    {dataset.filename}
-                                </div>
-                                <div className="flex justify-between mt-2">
-                                    <span className="text-label">ID: {dataset.id}</span>
-                                    <span className="text-label">{dataset.total_equipment_count} ITEMS</span>
-                                </div>
-                            </li>
-                        );
-                    })}
-                    {history.length === 0 && (
-                        <div className="text-secondary text-center p-4 text-sm">
-                            No logs found.
+    return (
+        <div ref={panelRef} className="p-3 space-y-2">
+            {history.map((item, index) => {
+                const isActive = item.id === currentDatasetId;
+                const timestamp = new Date(item.uploaded_at);
+
+                return (
+                    <div
+                        key={item.id || index}
+                        onClick={() => onSelectDataset && onSelectDataset(item.id)}
+                        className={`history-item p-3 rounded-lg cursor-pointer transition-all duration-200 ${isActive
+                                ? 'bg-purple-500/20 border border-purple-500/30'
+                                : 'hover:bg-white/5 border border-transparent'
+                            }`}
+                    >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                            <span className={`text-xs font-['JetBrains_Mono'] font-bold ${isActive ? 'text-purple-400' : 'text-slate-400'
+                                }`}>
+                                #{item.id}
+                            </span>
+                            {isActive && (
+                                <div className="w-2 h-2 rounded-full bg-purple-400 animate-glow" />
+                            )}
                         </div>
-                    )}
-                </ul>
-            </div>
+                        <p className="text-sm text-white font-medium truncate mb-1">
+                            {item.filename || 'Unknown'}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-['JetBrains_Mono']">
+                            {timestamp.toLocaleDateString()} • {timestamp.toLocaleTimeString()}
+                        </p>
+                    </div>
+                );
+            })}
         </div>
     );
 }

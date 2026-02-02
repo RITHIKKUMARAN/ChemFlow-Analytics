@@ -1,112 +1,158 @@
-import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '../hooks/useGSAP';
-import Navbar from '../components/layout/Navbar';
 import Scene from '../components/canvas/Scene';
-
-gsap.registerPlugin(ScrollTrigger);
+import FloatingNav from '../components/layout/FloatingNav';
 
 export default function LandingPage() {
     const navigate = useNavigate();
-    const mainRef = useRef(null);
+    const heroRef = useRef();
+    const titleRef = useRef();
+    const subtitleRef = useRef();
+    const ctaRef = useRef();
+    const statsRef = useRef();
 
-    useGSAP(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    useEffect(() => {
+        let ctx = gsap.context(() => {
+            const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-        // 1. Cinematic Intro
-        tl.from('.hero-line', {
-            y: 120,
-            opacity: 0,
-            skewY: 7,
-            duration: 1.8,
-            stagger: 0.15,
-            delay: 0.5
-        })
-            .from('.hero-meta', { opacity: 0, y: 20, duration: 1 }, '-=1')
-            .from('.cta-group', { opacity: 0, scale: 0.9, duration: 1 }, '-=0.8');
+            // Title letter animation
+            if (titleRef.current) {
+                const text = titleRef.current.textContent || "ChemFlow";
+                const letters = text.split('');
+                titleRef.current.innerHTML = '';
 
-        // 2. Scroll-driven Depth
-        gsap.to('.hero-container', {
-            y: -100,
-            opacity: 0,
-            scrollTrigger: {
-                trigger: '.hero-container',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: 1
+                letters.forEach((letter) => {
+                    const span = document.createElement('span');
+                    span.textContent = letter === ' ' ? '\u00A0' : letter;
+                    span.style.display = 'inline-block';
+                    span.style.opacity = '0';
+                    span.style.transform = 'translateY(40px) rotate(-5deg)';
+                    titleRef.current.appendChild(span);
+                });
+
+                tl.to(titleRef.current.children, {
+                    opacity: 1,
+                    y: 0,
+                    rotation: 0,
+                    stagger: 0.03,
+                    duration: 0.8
+                });
             }
-        });
 
-        // 3. Feature Pinning
-        const cards = gsap.utils.toArray('.feature-panel');
-        gsap.set(cards, { y: 100, opacity: 0 });
+            tl.from(subtitleRef.current, {
+                opacity: 0,
+                y: 30,
+                duration: 1
+            }, '-=0.4')
+                .from(ctaRef.current?.children || [], {
+                    opacity: 0,
+                    y: 20,
+                    scale: 0.95,
+                    duration: 0.6,
+                    stagger: 0.1
+                }, '-=0.5')
+                .from(statsRef.current?.children || [], {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.6,
+                    stagger: 0.1
+                }, '-=0.3');
+        }, heroRef);
 
-        ScrollTrigger.batch(cards, {
-            onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, overwrite: true }),
-            start: 'top 85%'
-        });
-
-    }, mainRef);
+        return () => ctx.revert();
+    }, []);
 
     return (
-        <div ref={mainRef} className="relative min-h-screen text-white overflow-x-hidden">
-            <Scene /> {/* WebGL Background */}
-            <Navbar />
+        <div className="relative min-h-screen overflow-hidden">
+            <Scene />
+            <FloatingNav />
 
-            {/* HERO SECTION */}
-            <section className="hero-container relative h-screen flex flex-col items-center justify-center p-6 text-center z-10">
-                <div className="overflow-hidden mb-2">
-                    <h1 className="hero-line text-[12vh] font-bold leading-none tracking-tighter mix-blend-overlay">
-                        INDUSTRIAL
-                    </h1>
-                </div>
-                <div className="overflow-hidden mb-8">
-                    <h1 className="hero-line text-[12vh] font-bold leading-none tracking-tighter text-accent mix-blend-screen">
-                        INTELLIGENCE
-                    </h1>
-                </div>
+            {/* Hero Section */}
+            <section
+                ref={heroRef}
+                className="relative min-h-screen flex items-center justify-center px-6 perspective-1200"
+            >
+                <div className="relative z-10 max-w-6xl mx-auto text-center">
+                    {/* Eyebrow */}
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-panel mb-8 animate-float">
+                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-glow shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                        <span className="text-sm font-medium text-cyan-200 tracking-wider uppercase font-['JetBrains_Mono']">
+                            Next-Gen Chemical Analytics
+                        </span>
+                    </div>
 
-                <div className="hero-meta max-w-xl mx-auto mb-12">
-                    <p className="text-lg text-gray-400 font-light leading-relaxed">
-                        Next-generation telemetry visualization for chemical processing units.
-                        GPU-accelerated <span className="text-white font-medium">real-time analytics</span>.
-                    </p>
-                </div>
-
-                <div className="cta-group flex gap-6">
-                    <button
-                        onClick={() => navigate('/register')}
-                        className="px-8 py-4 bg-white text-black font-bold rounded-lg hover:scale-105 transition-transform"
-                    >
-                        Initialize Console
-                    </button>
-                    <button className="px-8 py-4 border border-white/20 text-white rounded-lg hover:bg-white/5 transition-colors backdrop-blur-md">
-                        System Architecture
-                    </button>
-                </div>
-            </section>
-
-            {/* FEATURES SECTION (DEPTH LAYERS) */}
-            <section className="py-32 px-6 relative z-10">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                        { num: '01', title: 'Flow Dynamics', desc: 'Real-time computation of fluid velocity and pressure gradients.' },
-                        { num: '02', title: 'Thermal Logic', desc: 'Predictive heat-map generation using historical sensor arrays.' },
-                        { num: '03', title: 'Audit Ready', desc: 'Automated generation of ISO-compliant safety documentation.' }
-                    ].map((f, i) => (
-                        <div key={i} className="feature-panel p-10 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors group">
-                            <div className="text-sm font-mono text-gray-500 mb-6 group-hover:text-accent transition-colors">
-                                COMPONENT // {f.num}
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
-                            <p className="text-gray-400 leading-relaxed">{f.desc}</p>
+                    {/* Headline */}
+                    <h1 className="mb-6">
+                        <div
+                            ref={titleRef}
+                            className="font-['Space_Grotesk'] font-bold text-7xl sm:text-8xmlg:text-9xl tracking-tight text-white mb-2"
+                            style={{
+                                textShadow: '0 4px 20px rgba(139, 92, 246, 0.4), 0 0 60px rgba(6, 182, 212, 0.2)'
+                            }}
+                        >
+                            ChemFlow
                         </div>
-                    ))}
+                        <div className="font-['Space_Grotesk'] font-bold text-4xl sm:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400">
+                            Real-time Analytics
+                        </div>
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p
+                        ref={subtitleRef}
+                        className="text-xl sm:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed mb-10"
+                    >
+                        Monitor, analyze, and optimize chemical processes with{' '}
+                        <span className="text-cyan-400 font-medium">AI-powered insights</span>{' '}
+                        and predictive intelligence
+                    </p>
+
+                    {/* CTAs */}
+                    <div ref={ctaRef} className="flex flex-wrap gap-4 justify-center mb-16">
+                        <button
+                            onClick={() => navigate('/register')}
+                            className="btn-primary text-base px-8 py-4 flex items-center gap-3 group"
+                        >
+                            <span>Start Analyzing</span>
+                            <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="glass-panel text-white px-8 py-4 rounded-xl border border-white/10 font-semibold hover:border-purple-500/50 transition-all"
+                        >
+                            Sign In
+                        </button>
+                    </div>
+
+                    {/* Stats */}
+                    <div ref={statsRef} className="flex flex-wrap gap-8 sm:gap-12 justify-center">
+                        {[
+                            { value: '99.9%', label: 'Uptime', color: '#a78bfa' },
+                            { value: '<1ms', label: 'Response', color: '#22d3ee' },
+                            { value: 'AI', label: 'Powered', color: '#34d399' }
+                        ].map((stat, i) => (
+                            <div key={i} className="text-center">
+                                <div
+                                    className="text-4xl sm:text-5xl font-bold font-['JetBrains_Mono'] mb-2"
+                                    style={{
+                                        color: stat.color,
+                                        textShadow: `0 0 20px ${stat.color}60`
+                                    }}
+                                >
+                                    {stat.value}
+                                </div>
+                                <div className="text-xs text-slate-400 uppercase tracking-widest font-['JetBrains_Mono']">
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
-
         </div>
     );
 }

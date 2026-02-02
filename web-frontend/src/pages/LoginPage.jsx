@@ -1,92 +1,150 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import gsap from 'gsap';
-import { useGSAP } from '../hooks/useGSAP';
 import Scene from '../components/canvas/Scene';
+import FloatingNav from '../components/layout/FloatingNav';
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ username: '', password: '' });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const cardRef = useRef();
 
-    useGSAP(() => {
-        gsap.from('.login-card', {
-            y: 30,
-            opacity: 0,
-            duration: 1.2,
-            ease: "power3.out"
-        });
-        gsap.from('.form-element', {
-            y: 20,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.8,
-            delay: 0.4,
-            ease: "power2.out"
-        });
-    });
+    useEffect(() => {
+        let ctx = gsap.context(() => {
+            gsap.from(cardRef.current, {
+                opacity: 0,
+                y: 40,
+                scale: 0.95,
+                duration: 1,
+                ease: 'power3.out'
+            });
+        }, cardRef);
+
+        return () => ctx.revert();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
+
         try {
-            await authAPI.login(formData.username, formData.password);
-            navigate('/dashboard');
+            await authAPI.login({ email, password });
+
+            // Success animation
+            gsap.to(cardRef.current, {
+                opacity: 0,
+                y: -20,
+                duration: 0.5,
+                onComplete: () => navigate('/dashboard')
+            });
         } catch (err) {
-            setError('Invalid credentials');
-            gsap.fromTo('.error-msg', { x: -10 }, { x: 10, repeat: 3, yoyo: true, duration: 0.1 });
+            setError(err.response?.data?.error || 'Login failed');
+
+            // Error shake
+            gsap.to(cardRef.current, {
+                x: [-10, 10, -10, 10, 0],
+                duration: 0.4
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+        <div className="relative min-h-screen overflow-hidden flex items-center justify-center px-4">
             <Scene />
+            <FloatingNav />
 
-            <div className="card login-card w-full max-w-md p-10 relative z-10 mx-4">
-                <div className="text-center mb-8 form-element">
-                    <div className="text-5xl mb-4 animate-float">⚗️</div>
-                    <h2 className="text-3xl font-display font-bold text-white mb-2">Welcome Back</h2>
-                    <p className="text-muted">Sign in to access your terminal</p>
-                </div>
+            <div
+                ref={cardRef}
+                className="relative z-10 w-full max-w-md"
+            >
+                {/* Glow effect */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-2xl blur-2xl opacity-30 animate-glow" />
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                {/* Card */}
+                <div className="relative glass-panel rounded-2xl p-8 border border-white/10">
+                    {/* Header */}
+                    <div className="mb-8 text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/20">
+                            <span className="text-3xl">🔐</span>
+                        </div>
+                        <h1 className="text-3xl font-['Space_Grotesk'] font-bold text-white mb-2">
+                            Welcome Back
+                        </h1>
+                        <p className="text-slate-400">
+                            Sign in to access your analytics dashboard
+                        </p>
+                    </div>
+
+                    {/* Error Message */}
                     {error && (
-                        <div className="error-msg bg-error/10 border border-error/20 text-error p-3 rounded-lg text-center text-sm font-medium">
+                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
                             {error}
                         </div>
                     )}
 
-                    <div className="input-group form-element">
-                        <label className="input-label">Username</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={formData.username}
-                            onChange={e => setFormData({ ...formData, username: e.target.value })}
-                            placeholder="Enter your ID"
-                        />
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="input-glass w-full"
+                                placeholder="your@email.com"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="input-glass w-full"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-primary w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Signing in...
+                                </span>
+                            ) : (
+                                'Sign In'
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Footer */}
+                    <div className="mt-6 text-center text-sm text-slate-400">
+                        Don't have an account?{' '}
+                        <Link
+                            to="/register"
+                            className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                        >
+                            Sign up
+                        </Link>
                     </div>
-
-                    <div className="input-group form-element">
-                        <label className="input-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-input"
-                            value={formData.password}
-                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                            placeholder="••••••••"
-                        />
-                    </div>
-
-                    <button type="submit" className="btn btn-primary full-width form-element mt-2">
-                        Initialize Session
-                    </button>
-                </form>
-
-                <div className="mt-8 text-center border-t border-white/10 pt-6 form-element">
-                    <p className="text-sm text-muted">
-                        New Operator? <Link to="/register" className="text-accent font-bold hover:text-accent/80 transition-colors">Register Access</Link>
-                    </p>
                 </div>
             </div>
         </div>

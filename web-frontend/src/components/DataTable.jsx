@@ -2,55 +2,84 @@ import { useState } from 'react';
 
 export default function DataTable({ data }) {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
-
-    if (!data || data.length === 0) return null;
-
+    const itemsPerPage = 10;
     const totalPages = Math.ceil(data.length / itemsPerPage);
-    const paginatedData = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    
+    const paginatedData = data.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const getStatusColor = (status) => {
+        const colors = {
+            Normal: { bg: '#34d39920', text: '#34d399', border: '#34d39930' },
+            Warning: { bg: '#facc1520', text: '#facc15', border: '#facc1530' },
+            Critical: { bg: '#fb718520', text: '#fb7185', border: '#fb718530' }
+        };
+        return colors[status] || colors.Normal;
+    };
 
     return (
-        <div className="card w-full overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <span className="text-xl">📋</span>
-                    <h2 className="text-lg font-bold tracking-tight">Equipment Data Analysis</h2>
-                </div>
-                <div className="text-xs text-muted font-mono bg-white/5 px-3 py-1 rounded-full">
-                    {data.length} RECORDS DETECTED
-                </div>
-            </div>
-
+        <div>
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-white/5">
-                        <tr>
-                            <th className="py-4 px-6 text-left text-xs font-mono text-muted uppercase tracking-wider">Status</th>
-                            <th className="py-4 px-6 text-left text-xs font-mono text-muted uppercase tracking-wider">Equipment ID</th>
-                            <th className="py-4 px-6 text-left text-xs font-mono text-muted uppercase tracking-wider">Type</th>
-                            <th className="py-4 px-6 text-right text-xs font-mono text-muted uppercase tracking-wider">Flowrate</th>
-                            <th className="py-4 px-6 text-right text-xs font-mono text-muted uppercase tracking-wider">Pressure</th>
-                            <th className="py-4 px-6 text-right text-xs font-mono text-muted uppercase tracking-wider">Temperature</th>
+                    <thead>
+                        <tr className="border-b border-white/10">
+                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Equipment ID
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Type
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Flowrate
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Pressure
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-['JetBrains_Mono'] font-bold text-slate-400 uppercase tracking-wider">
+                                Temperature
+                            </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody>
                         {paginatedData.map((item, index) => {
-                            const status = item.status || 'Normal';
-                            const statusColor = status === 'Critical' ? 'text-error' : status === 'Warning' ? 'text-orange-400' : 'text-success';
-                            const rowClass = status === 'Critical' ? 'bg-error/10 animate-pulse-slow' : 'hover:bg-white/5';
-                            const statusIcon = status === 'Critical' ? '🔴' : status === 'Warning' ? '⚠️' : '✅';
-
+                            const statusStyle = getStatusColor(item.status);
                             return (
-                                <tr key={index} className={`transition-colors duration-200 ${rowClass}`}>
-                                    <td className={`py-4 px-6 font-mono text-xs font-bold ${statusColor}`}>
-                                        <span className="mr-2">{statusIcon}</span>
-                                        {status.toUpperCase()}
+                                <tr
+                                    key={index}
+                                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                                >
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className="px-3 py-1 rounded-lg text-[11px] font-['JetBrains_Mono'] font-bold uppercase"
+                                            style={{
+                                                backgroundColor: statusStyle.bg,
+                                                color: statusStyle.text,
+                                                border: `1px solid ${statusStyle.border}`
+                                            }}
+                                        >
+                                            {item.status || 'Normal'}
+                                        </span>
                                     </td>
-                                    <td className="py-4 px-6 font-mono text-sm text-white/80">{item.equipment_id}</td>
-                                    <td className="py-4 px-6 text-sm font-medium">{item.equipment_type}</td>
-                                    <td className="py-4 px-6 font-mono text-sm text-right text-accent">{item.flowrate.toFixed(1)}</td>
-                                    <td className="py-4 px-6 font-mono text-sm text-right text-success">{item.pressure.toFixed(1)}</td>
-                                    <td className="py-4 px-6 font-mono text-sm text-right text-orange-400">{item.temperature.toFixed(1)}</td>
+                                    <td className="px-6 py-4 text-sm font-['JetBrains_Mono'] text-white">
+                                        {item.equipment_id}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-300">
+                                        {item.equipment_type}
+                                    </td>
+                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-cyan-400">
+                                        {item.flowrate?.toFixed(1)}
+                                    </td>
+                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-purple-400">
+                                        {item.pressure?.toFixed(1)}
+                                    </td>
+                                    <td className="px-6 py-4 text-right text-sm font-['JetBrains_Mono'] text-amber-400">
+                                        {item.temperature?.toFixed(1)}
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -58,25 +87,28 @@ export default function DataTable({ data }) {
                 </table>
             </div>
 
+            {/* Pagination */}
             {totalPages > 1 && (
-                <div className="p-4 border-t border-white/5 flex justify-center gap-2">
-                    <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
-                    >
-                        ←
-                    </button>
-                    <span className="font-mono text-sm py-2 px-4 bg-white/5 rounded-lg text-muted">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
+                    <span className="text-sm text-slate-400 font-['JetBrains_Mono']">
                         Page {currentPage} of {totalPages}
                     </span>
-                    <button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
-                    >
-                        →
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

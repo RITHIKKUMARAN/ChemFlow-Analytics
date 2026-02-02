@@ -1,40 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { datasetAPI } from '../utils/api';
 import gsap from 'gsap';
-import { useGSAP } from '../hooks/useGSAP';
+import Scene from '../components/canvas/Scene';
+import FloatingNav from '../components/layout/FloatingNav';
 import UploadCSV from '../components/UploadCSV';
 import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
-import HistoryPanel from '../components/HistoryPanel';
-import Navbar from '../components/layout/Navbar';
-import Scene from '../components/canvas/Scene';
+import DataVis3D from '../components/canvas/DataVis3D';
 
 export default function Dashboard() {
     const [statistics, setStatistics] = useState(null);
     const [equipmentData, setEquipmentData] = useState([]);
     const [history, setHistory] = useState([]);
     const [datasetId, setDatasetId] = useState(null);
+    const [viewMode, setViewMode] = useState('3d');
 
-    // Cinematic Entrance
-    const container = useGSAP(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    const dashRef = useRef();
 
-        tl.from('.dash-nav', { y: -50, opacity: 0, duration: 1 })
-            .from('.stat-tile', {
-                scale: 0.8,
-                opacity: 0,
-                y: 20,
-                stagger: 0.1,
-                duration: 1.2
-            }, '-=0.5')
-            .from('.main-panel', {
-                y: 50,
-                opacity: 0,
-                duration: 1
-            }, '-=0.8');
-    });
+    useEffect(() => {
+        loadData();
+    }, []);
 
-    useEffect(() => { loadData(); }, []);
+    useEffect(() => {
+        let ctx;
+        if (dashRef.current && statistics) {
+            ctx = gsap.context(() => {
+                gsap.fromTo('.metric-card',
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        stagger: 0.1,
+                        duration: 0.8,
+                        ease: 'power3.out',
+                        clearProps: 'transform' // Keep opacity fully controlled or clear it? Better to clear transform, keep opacity 1. 
+                        // Actually, 'all' is safer if CSS handles the rest, but we want to ensure opacity 1.
+                        // Let's just animate to opacity 1.
+                    }
+                );
+
+                gsap.fromTo('.main-content',
+                    { opacity: 0, y: 40 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 1,
+                        ease: 'power3.out',
+                        delay: 0.3
+                    }
+                );
+            }, dashRef);
+        }
+        return () => ctx && ctx.revert();
+    }, [statistics]);
 
     const loadData = async () => {
         try {
@@ -46,106 +64,171 @@ export default function Dashboard() {
             setStatistics(statRes || null);
             setEquipmentData(statRes.equipment_data || []);
             setDatasetId(statRes.dataset_info?.id);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (
-        <div ref={container} className="relative min-h-screen text-white">
+        <div className="relative min-h-screen overflow-x-hidden" ref={dashRef}>
             <Scene />
-            <Navbar className="dash-nav" />
+            <FloatingNav />
 
-            <div className="page-container" style={{ paddingTop: '100px', maxWidth: '1600px' }}>
-
-                {/* HEAD UP DISPLAY (HUD) */}
-                <div className="flex justify-between items-end mb-10 dash-nav border-b border-white/10 pb-6">
+            <div className="relative z-10 max-w-[1600px] mx-auto px-6 pt-24 pb-16">
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 pb-8 border-b border-white/10">
                     <div>
-                        <div className="flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <h1 className="text-3xl font-bold tracking-tight">MISSION CONTROL</h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-glow shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
+                            <h1 className="text-4xl font-['Space_Grotesk'] font-bold text-white">
+                                Mission Control
+                            </h1>
                         </div>
-                        <p className="text-gray-400 font-mono text-sm mt-1">
-                            SECURE TERMINAL // {datasetId ? `DATASET: ${datasetId}` : 'NO DATALINK'}
+                        <p className="text-slate-400 font-['JetBrains_Mono'] text-sm">
+                            {datasetId ? `DATASET: ${datasetId}` : 'NO DATA LOADED'} • SECURE CONNECTION
                         </p>
                     </div>
-                    <div className="flex gap-4">
+
+                    <div className="flex gap-3 mt-4 lg:mt-0">
                         {statistics && (
                             <button
                                 onClick={() => datasetAPI.downloadPDF(datasetId)}
-                                className="px-6 py-2 border border-white/20 hover:bg-white/10 rounded transition-colors text-sm font-mono tracking-wide"
+                                className="glass-panel px-5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50 transition-all"
                             >
-                                DOWNLOAD_REPORT.PDF
+                                📥 Export PDF
                             </button>
                         )}
                         <UploadCSV onUploadSuccess={loadData} />
                     </div>
                 </div>
 
-                {/* TELEMETRY STRIP */}
+                {/* Metrics */}
                 {statistics && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <StatTile label="ACTIVE UNITS" value={statistics.total_equipment} unit="NODES" delay={0} />
-                        <StatTile label="AVG PRESSURE" value={statistics.avg_pressure.toFixed(1)} unit="BAR" delay={0.1} color="#60A5FA" />
-                        <StatTile label="AVG FLOWRATE" value={statistics.avg_flowrate.toFixed(1)} unit="M³/H" delay={0.2} color="#34D399" />
-                        <StatTile label="AVG TEMP" value={statistics.avg_temperature.toFixed(1)} unit="CELSIUS" delay={0.3} color="#F87171" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                        <MetricCard
+                            label="Active Units"
+                            value={statistics.total_equipment}
+                            unit="nodes"
+                            color="#a78bfa"
+                            icon="🎯"
+                        />
+                        <MetricCard
+                            label="Avg Pressure"
+                            value={statistics.avg_pressure.toFixed(1)}
+                            unit="bar"
+                            color="#22d3ee"
+                            icon="⚡"
+                        />
+                        <MetricCard
+                            label="Avg Flowrate"
+                            value={statistics.avg_flowrate.toFixed(1)}
+                            unit="m³/h"
+                            color="#34d399"
+                            icon="💧"
+                        />
+                        <MetricCard
+                            label="Avg Temp"
+                            value={statistics.avg_temperature.toFixed(1)}
+                            unit="°C"
+                            color="#f472b6"
+                            icon="🔥"
+                        />
                     </div>
                 )}
 
-                {/* MAIN CONSOLE GRID */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-350px)] min-h-[600px]">
+                {/* Main Content */}
+                <div className="main-content space-y-6">
+                    {/* Visualization */}
+                    <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                        {/* Tabs */}
+                        <div className="flex gap-2 mb-6">
+                            <button
+                                onClick={() => setViewMode('3d')}
+                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === '3d'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                🌌 3D View
+                            </button>
+                            <button
+                                onClick={() => setViewMode('charts')}
+                                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'charts'
+                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                📊 Analytics
+                            </button>
+                        </div>
 
-                    {/* LEFT: LOGS */}
-                    <div className="lg:col-span-3 h-full main-panel">
-                        <div className="h-full bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 border-b border-white/10 bg-white/5 font-mono text-xs text-gray-400">
-                                SYSTEM LOGS
-                            </div>
-                            <div className="flex-1 overflow-auto p-2">
-                                <HistoryPanel
-                                    history={history}
-                                    currentDatasetId={datasetId}
-                                    onSelectDataset={() => { }}
-                                />
-                            </div>
+                        {/* Visualization Area */}
+                        <div className="min-h-[500px]">
+                            {statistics && viewMode === '3d' && (
+                                <DataVis3D data={equipmentData} />
+                            )}
+                            {statistics && viewMode === 'charts' && (
+                                <Charts statistics={statistics} equipmentData={equipmentData} />
+                            )}
+                            {!statistics && (
+                                <div className="h-[500px] flex items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="text-6xl mb-4">📊</div>
+                                        <p className="text-slate-400 font-medium">
+                                            Upload a dataset to begin analysis
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* CENTER: VISUALIZATION */}
-                    <div className="lg:col-span-9 flex flex-col gap-6 main-panel h-full">
-                        {/* CHART ARRAY */}
-                        <div className="flex-1 bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl p-6 relative group">
-                            <div className="absolute top-4 right-4 flex gap-2">
-                                <span className="text-[10px] font-mono border border-white/20 px-2 py-0.5 rounded text-gray-500">LIVE RENDER</span>
+                    {/* Data Table */}
+                    {equipmentData.length > 0 && (
+                        <div className="glass-panel rounded-2xl overflow-hidden border border-white/10">
+                            <div className="p-5 border-b border-white/10 flex justify-between items-center">
+                                <h3 className="font-['Space_Grotesk'] font-bold text-lg text-white">
+                                    Equipment Data Stream
+                                </h3>
+                                <span className="text-xs font-['JetBrains_Mono'] text-cyan-400">
+                                    {equipmentData.length} RECORDS
+                                </span>
                             </div>
-                            <Charts statistics={statistics} equipmentData={equipmentData} />
+                            <DataTable data={equipmentData} />
                         </div>
-
-                        {/* DATA STREAM */}
-                        <div className="h-1/3 bg-[#0B0F15]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center px-6">
-                                <span className="font-mono text-xs text-gray-400">INCOMING STREAM</span>
-                                <span className="font-mono text-xs text-accent">{equipmentData.length} RECORDS PARSED</span>
-                            </div>
-                            <div className="flex-1 overflow-auto">
-                                <DataTable data={equipmentData} />
-                            </div>
-                        </div>
-                    </div>
-
+                    )}
                 </div>
-
             </div>
         </div>
     );
 }
 
-function StatTile({ label, value, unit, delay, color = 'white' }) {
+function MetricCard({ label, value, unit, color, icon }) {
     return (
-        <div className="stat-tile bg-[#0B0F15]/60 backdrop-blur-sm border border-white/10 p-6 rounded-xl relative overflow-hidden group hover:border-white/30 transition-colors">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-bl-full -mr-10 -mt-10" />
-            <div className="font-mono text-xs text-gray-500 mb-2 tracking-widest">{label}</div>
-            <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold font-mono tracking-tighter" style={{ color }}>{value}</span>
-                <span className="text-xs font-mono text-gray-600">{unit}</span>
+        <div className="metric-card glass-panel p-6 rounded-xl border border-white/10 group hover:border-white/20 transition-all cursor-default">
+            <div className="flex items-start justify-between mb-3">
+                <span className="text-3xl">{icon}</span>
+                <div
+                    className="px-2 py-1 rounded-lg text-[10px] font-['JetBrains_Mono'] font-bold uppercase"
+                    style={{
+                        backgroundColor: `${color}20`,
+                        color: color
+                    }}
+                >
+                    {unit}
+                </div>
+            </div>
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 font-['JetBrains_Mono']">
+                {label}
+            </div>
+            <div
+                className="text-4xl font-bold font-['JetBrains_Mono'] group-hover:scale-105 transition-transform origin-left"
+                style={{
+                    color: color,
+                    textShadow: `0 0 20px ${color}60`
+                }}
+            >
+                {value}
             </div>
         </div>
     );
