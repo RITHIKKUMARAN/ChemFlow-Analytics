@@ -60,7 +60,12 @@ const chartDefaults = {
                 label: (context) => {
                     let label = context.dataset.label || '';
                     if (label) label += ': ';
-                    if (context.parsed.y !== null) label += context.parsed.y + (context.dataset.unit || '');
+
+                    const value = context.parsed.y !== undefined ? context.parsed.y : context.parsed;
+
+                    if (value !== null && value !== undefined) {
+                        label += value + (context.dataset.unit || '');
+                    }
                     return label;
                 }
             }
