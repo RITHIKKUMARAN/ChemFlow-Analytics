@@ -22,7 +22,8 @@ class LoginWindow(QWidget):
     def init_ui(self):
         """Initialize UI"""
         self.setWindowTitle('ChemFlow Analytics - Login')
-        self.setFixedSize(450, 550)
+        self.resize(500, 650)
+        self.setMinimumSize(450, 600)
         self.setStyleSheet("""
             QWidget {
                 background-color: #0a0e1a;
@@ -36,9 +37,9 @@ class LoginWindow(QWidget):
                 background-color: #1a202c;
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 8px;
-                padding: 12px;
+                padding: 14px;
                 color: #f9fafb;
-                font-size: 14px;
+                font-size: 15px;
             }
             QLineEdit:focus {
                 border: 1px solid #3b82f6;
@@ -50,9 +51,9 @@ class LoginWindow(QWidget):
                 );
                 border: none;
                 border-radius: 8px;
-                padding: 12px 24px;
+                padding: 14px 24px;
                 color: white;
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -79,49 +80,52 @@ class LoginWindow(QWidget):
                 background-color: rgba(17, 24, 39, 0.8);
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 16px;
+                min-width: 350px;
+                max-width: 450px;
             }
         """)
         
         # Main layout
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addStretch()
         
         # Container frame
         container = QFrame()
         container.setObjectName("container")
         container_layout = QVBoxLayout()
-        container_layout.setContentsMargins(30, 30, 30, 30)
-        container_layout.setSpacing(20)
+        container_layout.setContentsMargins(40, 40, 40, 40)
+        container_layout.setSpacing(25)
         
         # Logo/Icon
         logo = QLabel('⚗️')
         logo.setAlignment(Qt.AlignCenter)
         logo_font = QFont()
-        logo_font.setPointSize(48)
+        logo_font.setPointSize(56)
         logo.setFont(logo_font)
         
         # Title
         title = QLabel('Welcome')
         title.setAlignment(Qt.AlignCenter)
         title_font = QFont()
-        title_font.setPointSize(24)
+        title_font.setPointSize(28)
         title_font.setBold(True)
         title.setFont(title_font)
         
         # Subtitle
         subtitle = QLabel('Sign in to your account')
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("color: #9ca3af; font-size: 14px;")
+        subtitle.setStyleSheet("color: #9ca3af; font-size: 15px;")
         
         # Username input
         username_label = QLabel('USERNAME')
-        username_label.setStyleSheet("font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
+        username_label.setStyleSheet("font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText('Enter your username')
         
         # Password input
         password_label = QLabel('PASSWORD')
-        password_label.setStyleSheet("font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
+        password_label.setStyleSheet("font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setPlaceholderText('Enter your password')
@@ -142,17 +146,25 @@ class LoginWindow(QWidget):
         container_layout.addWidget(logo)
         container_layout.addWidget(title)
         container_layout.addWidget(subtitle)
-        container_layout.addSpacing(10)
+        container_layout.addSpacing(15)
         container_layout.addWidget(username_label)
         container_layout.addWidget(self.username_input)
         container_layout.addWidget(password_label)
         container_layout.addWidget(self.password_input)
-        container_layout.addSpacing(10)
+        container_layout.addSpacing(15)
         container_layout.addWidget(self.login_btn)
         container_layout.addWidget(register_btn)
         
         container.setLayout(container_layout)
-        main_layout.addWidget(container)
+        
+        # Center container in main layout
+        h_layout = QHBoxLayout()
+        h_layout.addStretch()
+        h_layout.addWidget(container)
+        h_layout.addStretch()
+        
+        main_layout.addLayout(h_layout)
+        main_layout.addStretch()
         self.setLayout(main_layout)
     
     def handle_login(self):
