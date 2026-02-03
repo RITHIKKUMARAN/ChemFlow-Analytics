@@ -1,6 +1,5 @@
 <div align="center">
 
-<!-- HERO SECTION -->
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=ChemFlow%20Analytics&fontSize=42&fontColor=fff&animation=twinkling&fontAlignY=32" />
 
 <div align="center">
@@ -8,7 +7,6 @@
 
 <br/>
 
-<!-- BADGES -->
 <p align="center">
   <img src="https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
   <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green" alt="Django"/>
@@ -30,13 +28,11 @@
 
 <br/>
 
-<!-- ANIMATED DEMO LINK -->
 <a href="https://chemflow-rk.vercel.app" target="_blank">
 </a>
 
 <br/><br/>
 
-<!-- QUICK NAVIGATION -->
 <p align="center">
   <a href="#-what-is-chemflow"><kbd> 📖 Overview </kbd></a>
   <a href="#-core-features"><kbd> ✨ Features </kbd></a>
@@ -52,7 +48,7 @@
 
 <br/>
 
-<!-- OVERVIEW SECTION -->
+
 <div align="center">
 
 ## 🌟 What is ChemFlow?
@@ -114,7 +110,6 @@ graph LR
 
 ---
 
-<!-- CORE FEATURES -->
 <div align="center">
 
 ## ✨ Core Features
@@ -215,7 +210,6 @@ graph LR
 
 ---
 
-<!-- TECHNOLOGY STACK -->
 <div align="center">
 
 ## 🛠️ Technology Powerhouse
@@ -343,7 +337,6 @@ graph LR
 
 ---
 
-<!-- ARCHITECTURE DIAGRAM -->
 <div align="center">
 
 ## 🏗️ System Architecture
@@ -377,7 +370,6 @@ graph LR
 
 ---
 
-<!-- QUICK START -->
 <div align="center">
 
 ## 🚀 Quick Start
@@ -515,7 +507,6 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 
 ---
 
-<!-- USAGE GUIDE -->
 <div align="center">
 
 ## 📖 Usage Guide
@@ -581,7 +572,6 @@ EQ004,Distillation Column,220.1,15.2,180.7
 
 ---
 
-<!-- SHOWCASE -->
 <div align="center">
 
 ## 🎨 Showcase
@@ -644,7 +634,7 @@ EQ004,Distillation Column,220.1,15.2,180.7
 
 ---
 
-<!-- USE CASES -->
+
 <div align="center">
 
 ## 💼 Real-World Applications
@@ -701,7 +691,6 @@ EQ004,Distillation Column,220.1,15.2,180.7
 
 ---
 
-<!-- CONTRIBUTING -->
 <div align="center">
 
 ## 🤝 Contributing
@@ -771,7 +760,6 @@ git push origin feature/your-feature
 
 ---
 
-<!-- LICENSE -->
 <div align="center">
 
 ## 📜 License
@@ -794,7 +782,6 @@ See the [LICENSE](https://github.com/RITHIKKUMARAN/ChemFlow-Analytics/blob/maste
 
 ---
 
-<!-- AUTHOR -->
 <div align="center">
 
 ## 👨‍💻 Author
@@ -816,7 +803,6 @@ See the [LICENSE](https://github.com/RITHIKKUMARAN/ChemFlow-Analytics/blob/maste
 
 ---
 
-<!-- ACKNOWLEDGMENTS -->
 <div align="center">
 
 ## 🙏 Acknowledgments
@@ -861,7 +847,6 @@ And the entire **open-source community** for making projects like this possible!
 
 ---
 
-<!-- SUPPORT -->
 <div align="center">
 
 ## 💖 Support
