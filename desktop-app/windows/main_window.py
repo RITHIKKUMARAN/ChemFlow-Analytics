@@ -172,6 +172,7 @@ class MainWindow(QMainWindow):
         
         # Charts tab widget
         self.charts_tabs = QTabWidget()
+        self.charts_tabs.setMinimumHeight(520)
         self.pie_chart = PieChartWidget()
         self.bar_chart = BarChartWidget()
         self.line_chart = LineChartWidget()

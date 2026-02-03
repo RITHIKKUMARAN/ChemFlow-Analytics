@@ -19,16 +19,23 @@ def main():
     # Create API client
     api_client = APIClient()
     
+    # Keep reference to windows to prevent garbage collection
+    windows = {}
+    
     # Show login window
-    login_window = LoginWindow(api_client)
+    windows['login'] = LoginWindow(api_client)
     
     def on_login_success(user_data):
         """Open main window on successful login"""
-        main_window = MainWindow(api_client, user_data)
-        main_window.show()
+        # Close login window if still open (though it closes itself usually)
+        if 'login' in windows:
+            windows['login'].close()
+            
+        windows['main'] = MainWindow(api_client, user_data)
+        windows['main'].show()
     
-    login_window.login_successful.connect(on_login_success)
-    login_window.show()
+    windows['login'].login_successful.connect(on_login_success)
+    windows['login'].show()
     
     sys.exit(app.exec_())
 
