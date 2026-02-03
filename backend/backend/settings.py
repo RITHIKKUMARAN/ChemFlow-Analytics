@@ -70,7 +70,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
-# Uses 'DB_PATH' if provided (for Persistent Disk), otherwise default local file
+# Uses 'DB_PATH' if provided (e.g. for PythonAnywhere or Volume), otherwise default local file
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
