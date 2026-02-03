@@ -100,8 +100,8 @@ const CustomCursor = () => {
         const loop = () => {
             // Lerp for the ring
             // ringX = ringX + (mouseX - ringX) * speed
-            ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.15;
-            ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.15;
+            ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.4;
+            ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.4;
 
             if (ringRef.current) {
                 ringRef.current.style.transform = `translate3d(${ringPos.current.x}px, ${ringPos.current.y}px, 0)`;
