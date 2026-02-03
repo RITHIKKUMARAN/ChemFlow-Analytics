@@ -65,7 +65,7 @@ export const aiHelper = {
             const healthScore = calculatedScore.toFixed(0);
 
             // Generate AI insights with better context
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
             const prompt = `
                 Role: Senior Chemical Process Engineer.
                 Task: Analyze plant status from statistical data.
@@ -125,7 +125,7 @@ export const aiHelper = {
                 `${d.equipment_id} (${d.equipment_type}): T=${d.temperature}°C, P=${d.pressure}bar`
             ).join('\n');
 
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
             const prompt = `
                 You are "Sentinel", an AI dashboard assistant for a chemical plant.
                 
