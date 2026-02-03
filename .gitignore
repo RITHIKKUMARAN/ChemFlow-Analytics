@@ -74,3 +74,4 @@ Thumbs.db
 *.spec
 
 DEPLOYMENT_INSTRUCTIONS_SECURE.md
+*.md
