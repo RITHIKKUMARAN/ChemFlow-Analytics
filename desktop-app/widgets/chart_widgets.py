@@ -13,7 +13,7 @@ class ChartWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumHeight(450)
-        self.figure = Figure(figsize=(8, 6), facecolor='#1a202c')
+        self.figure = Figure(figsize=(8, 6), facecolor='#020617')
         self.canvas = FigureCanvas(self.figure)
         
         layout = QVBoxLayout()

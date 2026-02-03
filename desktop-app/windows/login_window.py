@@ -21,66 +21,69 @@ class LoginWindow(QWidget):
     
     def init_ui(self):
         """Initialize UI"""
-        self.setWindowTitle('ChemFlow Analytics - Login')
+        self.setWindowTitle('ChemFlow Mission Control')
         self.resize(500, 650)
         self.setMinimumSize(450, 600)
         self.setStyleSheet("""
             QWidget {
-                background-color: #0a0e1a;
-                color: #f9fafb;
+                background-color: #020617;
+                color: #E6EAF0;
                 font-family: 'Segoe UI', Arial, sans-serif;
             }
             QLabel {
-                color: #f9fafb;
+                color: #E6EAF0;
             }
             QLineEdit {
-                background-color: #1a202c;
+                background-color: rgba(15, 23, 42, 0.5);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 14px;
-                color: #f9fafb;
+                color: #E6EAF0;
                 font-size: 15px;
             }
             QLineEdit:focus {
-                border: 1px solid #3b82f6;
+                border: 1px solid rgba(124, 58, 237, 0.5);
+                background-color: rgba(15, 23, 42, 0.7);
             }
             QPushButton {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2
+                    stop:0 #7c3aed, stop:0.5 #6366f1, stop:1 #3b82f6
                 );
                 border: none;
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 14px 24px;
                 color: white;
                 font-size: 15px;
-                font-weight: bold;
+                font-weight: 600;
             }
             QPushButton:hover {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #7c8ef0, stop:1 #8a5fb8
+                    stop:0 #8b5cf6, stop:0.5 #818cf8, stop:1 #60a5fa
                 );
             }
             QPushButton:pressed {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #5a6fd8, stop:1 #694394
+                    stop:0 #6d28d9, stop:1 #2563eb
                 );
             }
             QPushButton#secondaryBtn {
-                background-color: #1a202c;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background-color: transparent;
+                border: none;
+                color: #a78bfa;
+                font-weight: normal;
             }
             QPushButton#secondaryBtn:hover {
-                background-color: #2d3748;
-                border-color: #3b82f6;
+                color: #c4b5fd;
+                text-decoration: underline;
             }
             QFrame#container {
-                background-color: rgba(17, 24, 39, 0.8);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 16px;
-                min-width: 350px;
+                background-color: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 20px;
+                min-width: 380px;
                 max-width: 450px;
             }
         """)
@@ -95,40 +98,47 @@ class LoginWindow(QWidget):
         container.setObjectName("container")
         container_layout = QVBoxLayout()
         container_layout.setContentsMargins(40, 40, 40, 40)
-        container_layout.setSpacing(25)
+        container_layout.setSpacing(20)
         
         # Logo/Icon
-        logo = QLabel('⚗️')
-        logo.setAlignment(Qt.AlignCenter)
-        logo_font = QFont()
-        logo_font.setPointSize(56)
-        logo.setFont(logo_font)
+        logo_container = QHBoxLayout()
+        logo_container.addStretch()
+        logo_bg = QLabel('👋')
+        logo_bg.setAlignment(Qt.AlignCenter)
+        logo_bg.setFixedSize(64, 64)
+        logo_bg.setStyleSheet("""
+            background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #7c3aed, stop:1 #22d3ee);
+            border-radius: 16px;
+            font-size: 32px;
+        """)
+        logo_container.addWidget(logo_bg)
+        logo_container.addStretch()
         
         # Title
-        title = QLabel('Welcome')
+        title = QLabel('Welcome Back')
         title.setAlignment(Qt.AlignCenter)
         title_font = QFont()
-        title_font.setPointSize(28)
+        title_font.setPointSize(24)
         title_font.setBold(True)
         title.setFont(title_font)
         
         # Subtitle
-        subtitle = QLabel('Sign in to your account')
+        subtitle = QLabel('Sign in to access your analytics dashboard')
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("color: #9ca3af; font-size: 15px;")
+        subtitle.setStyleSheet("color: #94a3b8; font-size: 14px;")
         
         # Username input
-        username_label = QLabel('USERNAME')
-        username_label.setStyleSheet("font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
+        username_label = QLabel('Surname / Username')
+        username_label.setStyleSheet("color: #cbd5e1; font-weight: 500; font-size: 14px;")
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText('Enter your username')
+        self.username_input.setPlaceholderText('johndoe')
         
         # Password input
-        password_label = QLabel('PASSWORD')
-        password_label.setStyleSheet("font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #9ca3af;")
+        password_label = QLabel('Password')
+        password_label.setStyleSheet("color: #cbd5e1; font-weight: 500; font-size: 14px;")
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setPlaceholderText('Enter your password')
+        self.password_input.setPlaceholderText('••••••••')
         self.password_input.returnPressed.connect(self.handle_login)
         
         # Login button
@@ -137,23 +147,36 @@ class LoginWindow(QWidget):
         self.login_btn.setCursor(Qt.PointingHandCursor)
         
         # Register button
-        register_btn = QPushButton('Create New Account')
+        register_container = QHBoxLayout()
+        register_label = QLabel("Don't have an account?")
+        register_label.setStyleSheet("color: #94a3b8; font-size: 13px;")
+        
+        register_btn = QPushButton('Sign up')
         register_btn.setObjectName("secondaryBtn")
         register_btn.clicked.connect(self.show_register_dialog)
         register_btn.setCursor(Qt.PointingHandCursor)
         
+        register_container.addStretch()
+        register_container.addWidget(register_label)
+        register_container.addWidget(register_btn)
+        register_container.addStretch()
+        
         # Add widgets to container
-        container_layout.addWidget(logo)
+        container_layout.addLayout(logo_container)
+        container_layout.addSpacing(10)
         container_layout.addWidget(title)
         container_layout.addWidget(subtitle)
-        container_layout.addSpacing(15)
+        container_layout.addSpacing(20)
+        
         container_layout.addWidget(username_label)
         container_layout.addWidget(self.username_input)
+        
         container_layout.addWidget(password_label)
         container_layout.addWidget(self.password_input)
-        container_layout.addSpacing(15)
+        
+        container_layout.addSpacing(10)
         container_layout.addWidget(self.login_btn)
-        container_layout.addWidget(register_btn)
+        container_layout.addLayout(register_container)
         
         container.setLayout(container_layout)
         
