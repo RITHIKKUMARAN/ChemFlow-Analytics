@@ -133,20 +133,42 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Signing in...
-                                </span>
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
+                        <div className="flex justify-center pt-2">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="group relative px-10 py-3 rounded-full font-bold text-white text-sm tracking-wide transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_10px_20px_-5px_rgba(79,70,229,0.5)]"
+                            >
+                                {/* Vibrant Deep Gradient Background (No Grey) */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-full" />
+
+                                {/* Inner Bevel/Depth Highlight */}
+                                <div className="absolute inset-0 box-border border-t border-white/30 rounded-full opacity-50" />
+
+                                {/* Electric Glow Underneath */}
+                                <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 to-purple-400 blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-500 -z-10" />
+
+                                {/* Content */}
+                                <div className="relative z-10 flex items-center justify-center gap-2">
+                                    {loading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            <span>Authenticating...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Sign In</span>
+                                            <svg
+                                                className="w-4 h-4 text-white/80 group-hover:translate-x-1 transition-all duration-300"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </>
+                                    )}
+                                </div>
+                            </button>
+                        </div>
                     </form>
 
                     {/* Footer */}
