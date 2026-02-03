@@ -4,6 +4,7 @@ import { authAPI } from '../utils/api';
 import gsap from 'gsap';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
+import BuiltBy from '../components/layout/BuiltBy';
 import { Atom } from 'lucide-react';
 
 export default function LoginPage() {
@@ -183,6 +184,8 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
+
+            <BuiltBy />
         </div>
     );
 }

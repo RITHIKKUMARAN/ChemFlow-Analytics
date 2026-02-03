@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
+import CreatorWidget from '../components/layout/CreatorWidget';
 import UploadCSV from '../components/UploadCSV';
 import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
@@ -205,6 +206,7 @@ export default function Dashboard() {
             <DashboardStyles />
             <Scene />
             <FloatingNav onProfileClick={() => setShowProfileModal(true)} />
+            <CreatorWidget />
 
             {/* AI Assistant Layer */}
             {statistics && <SentinelChat equipmentData={equipmentData} />}
