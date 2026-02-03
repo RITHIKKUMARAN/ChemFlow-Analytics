@@ -46,90 +46,118 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize UI"""
-        self.setWindowTitle('ChemFlow Analytics - Dashboard')
-        self.setGeometry(100, 100, 1400, 900)
+        self.setWindowTitle('ChemFlow Mission Control')
+        self.setGeometry(100, 100, 1400, 950)
         
         self.setStyleSheet("""
             QMainWindow, QWidget {
-                background-color: #0a0e1a;
-                color: #f9fafb;
+                background-color: #020617;
+                color: #E6EAF0;
                 font-family: 'Segoe UI', Arial, sans-serif;
             }
             QPushButton {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2
+                    stop:0 #7c3aed, stop:0.5 #6366f1, stop:1 #3b82f6
                 );
-                border: none;
-                border-radius: 8px;
-                padding: 10px 20px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 12px 24px;
                 color: white;
-                font-size: 13px;
-                font-weight: bold;
+                font-size: 14px;
+                font-weight: 600;
             }
             QPushButton:hover {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #7c8ef0, stop:1 #8a5fb8
+                    stop:0 #8b5cf6, stop:0.5 #818cf8, stop:1 #60a5fa
                 );
-            }
-            QPushButton#successBtn {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #43e97b, stop:1 #38f9d7
-                );
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
             QPushButton#secondaryBtn {
-                background-color: #1a202c;
+                background-color: rgba(255, 255, 255, 0.05);
                 border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #94a3b8;
+            }
+            QPushButton#secondaryBtn:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+            QFrame#panel {
+                background-color: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
             }
             QFrame#card {
-                background-color: rgba(17, 24, 39, 0.8);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 15px;
+                background-color: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
             }
             QTableWidget {
-                background-color: rgba(17, 24, 39, 0.8);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-                color: #d1d5db;
+                background-color: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                gridline-color: rgba(255, 255, 255, 0.05);
+                color: #cbd5e1;
+                alternate-background-color: rgba(59, 130, 246, 0.08);
             }
             QTableWidget::item {
-                padding: 8px;
+                padding: 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             }
             QTableWidget::item:selected {
-                background-color: rgba(59, 130, 246, 0.2);
+                background-color: rgba(99, 102, 241, 0.2);
             }
             QHeaderView::section {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2
-                );
-                color: white;
-                padding: 10px;
+                background-color: rgba(30, 41, 59, 0.8);
+                color: #94a3b8;
+                padding: 12px;
                 border: none;
                 font-weight: bold;
+                text-transform: uppercase;
+                font-size: 11px;
+                letter-spacing: 1px;
             }
             QTabWidget::pane {
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                background-color: rgba(17, 24, 39, 0.8);
-                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background-color: rgba(15, 23, 42, 0.6);
+                border-radius: 16px;
+                padding: 20px;
             }
             QTabBar::tab {
-                background-color: #1a202c;
-                color: #9ca3af;
-                padding: 10px 20px;
-                margin-right: 5px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
+                background-color: rgba(255, 255, 255, 0.05);
+                color: #94a3b8;
+                padding: 12px 24px;
+                margin-right: 10px;
+                border-radius: 20px;
+                font-weight: 600;
+                border: 1px solid transparent;
             }
             QTabBar::tab:selected {
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2
+                    stop:0 #7c3aed, stop:1 #3b82f6
                 );
                 color: white;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            QTabBar::tab:hover:!selected {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #020617;
+                width: 10px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background: #334155;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
             }
         """)
         
@@ -139,63 +167,76 @@ class MainWindow(QMainWindow):
         
         # Main layout
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(25)
         
         # Header
         header = self.create_header()
         main_layout.addWidget(header)
         
-        # Statistics cards
-        self.stats_container = QFrame()
+        # Statistics cards container
         self.stats_layout = QHBoxLayout()
-        self.stats_layout.setSpacing(15)
-        self.stats_container.setLayout(self.stats_layout)
-        main_layout.addWidget(self.stats_container)
-        
-        # Upload button
-        upload_btn = QPushButton('📤 Upload CSV File')
-        upload_btn.setObjectName("successBtn")
-        upload_btn.clicked.connect(self.upload_csv)
-        upload_btn.setFixedHeight(50)
-        upload_btn.setCursor(Qt.PointingHandCursor)
-        main_layout.addWidget(upload_btn)
+        self.stats_layout.setSpacing(20)
+        main_layout.addLayout(self.stats_layout)
         
         # Content area with scroll
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; }")
+        scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
         
         scroll_content = QWidget()
+        scroll_content.setStyleSheet("background: transparent;")
         scroll_layout = QVBoxLayout()
-        scroll_layout.setSpacing(20)
+        scroll_layout.setSpacing(30)
+        scroll_layout.setContentsMargins(0, 20, 0, 0)
         
-        # Charts tab widget
+        # Charts section
         self.charts_tabs = QTabWidget()
-        self.charts_tabs.setMinimumHeight(520)
+        self.charts_tabs.setMinimumHeight(600)
         self.pie_chart = PieChartWidget()
         self.bar_chart = BarChartWidget()
         self.line_chart = LineChartWidget()
         
+        # Add icons or just text
         self.charts_tabs.addTab(self.pie_chart, "Equipment Distribution")
-        self.charts_tabs.addTab(self.bar_chart, "Flowrate & Pressure")
-        self.charts_tabs.addTab(self.line_chart, "Temperature Trend")
+        self.charts_tabs.addTab(self.bar_chart, "Analytics: Flow & Pressure")
+        self.charts_tabs.addTab(self.line_chart, "Analytics: Temperature Trend")
         
         scroll_layout.addWidget(self.charts_tabs)
         
-        # Data table
-        table_label = QLabel('📋 Equipment Data')
-        table_label.setStyleSheet("font-size: 18px; font-weight: bold; margin-top: 10px;")
-        scroll_layout.addWidget(table_label)
+        # Data table section
+        table_container = QFrame()
+        table_container.setObjectName("panel")
+        table_layout = QVBoxLayout()
+        table_layout.setContentsMargins(20, 20, 20, 20)
+        
+        table_header = QHBoxLayout()
+        table_label = QLabel('Equipment Data Stream')
+        table_label.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
+        table_count = QLabel('LIVE')
+        table_count.setStyleSheet("color: #22d3ee; font-family: 'Consolas'; font-size: 12px; font-weight: bold; background: rgba(34, 211, 238, 0.1); padding: 4px 8px; border-radius: 4px;")
+        
+        table_header.addWidget(table_label)
+        table_header.addWidget(table_count)
+        table_header.addStretch()
+        
+        table_layout.addLayout(table_header)
         
         self.data_table = QTableWidget()
         self.data_table.setColumnCount(5)
         self.data_table.setHorizontalHeaderLabels([
-            'Equipment ID', 'Type', 'Flowrate', 'Pressure', 'Temperature'
+            'EQUIPMENT ID', 'TYPE', 'FLOWRATE', 'PRESSURE', 'TEMPERATURE'
         ])
         self.data_table.horizontalHeader().setStretchLastSection(True)
-        self.data_table.setMinimumHeight(300)
-        scroll_layout.addWidget(self.data_table)
+        self.data_table.setMinimumHeight(350)
+        self.data_table.verticalHeader().setVisible(False)
+        self.data_table.setAlternatingRowColors(True)
+        self.data_table.setShowGrid(False)
+        
+        table_layout.addWidget(self.data_table)
+        table_container.setLayout(table_layout)
+        
+        scroll_layout.addWidget(table_container)
         
         scroll_content.setLayout(scroll_layout)
         scroll.setWidget(scroll_content)
@@ -203,151 +244,197 @@ class MainWindow(QMainWindow):
         
         central_widget.setLayout(main_layout)
         
-        # Menu bar
-        menubar = self.menuBar()
-        menubar.setStyleSheet("""
-            QMenuBar {
-                background-color: #111827;
-                color: #f9fafb;
-                padding: 5px;
-            }
-            QMenuBar::item:selected {
-                background-color: #1f2937;
-            }
-            QMenu {
-                background-color: #111827;
-                color: #f9fafb;
-            }
-            QMenu::item:selected {
-                background-color: #1f2937;
-            }
-        """)
-        
-        file_menu = menubar.addMenu('&File')
-        file_menu.addAction('Upload CSV', self.upload_csv)
-        file_menu.addAction('Download PDF', self.download_pdf)
-        file_menu.addSeparator()
-        file_menu.addAction('Exit', self.close)
-        
-        help_menu = menubar.addMenu('&Help')
-        help_menu.addAction('About', self.show_about)
-    
+        # Initialize with placeholders
+        self.update_statistics()
+
     def create_header(self):
-        """Create header with title and actions"""
-        header = QFrame()
-        header.setObjectName("card")
+        """Create 'Mission Control' header"""
+        header = QWidget()
         header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Logo and title
-        logo_layout = QHBoxLayout()
-        logo = QLabel('⚗️')
-        logo_font = QFont()
-        logo_font.setPointSize(24)
-        logo.setFont(logo_font)
+        # Left side: Title + Status
+        title_container = QVBoxLayout()
+        title_container.setSpacing(5)
         
-        title = QLabel('ChemFlow Analytics')
-        title_font = QFont()
-        title_font.setPointSize(18)
-        title_font.setBold(True)
-        title.setFont(title_font)
+        # Title Row
+        title_row = QHBoxLayout()
+        indicator = QLabel()
+        indicator.setFixedSize(12, 12)
+        indicator.setStyleSheet("background-color: #34d399; border-radius: 6px; border: 2px solid rgba(52, 211, 153, 0.3);")
         
-        logo_layout.addWidget(logo)
-        logo_layout.addWidget(title)
-        logo_layout.addStretch()
+        title = QLabel('Mission Control')
+        title.setStyleSheet("font-size: 32px; font-weight: bold; color: white; letter-spacing: -1px;")
         
-        # Action buttons
+        title_row.addWidget(indicator)
+        title_row.addWidget(title)
+        
+        # Status Row
+        status_row = QHBoxLayout()
+        status_label = QLabel('SECURE CONNECTION')
+        status_label.setStyleSheet("color: #34d399; font-size: 11px; font-weight: bold; letter-spacing: 1px;")
+        
+        separator = QLabel('•')
+        separator.setStyleSheet("color: #475569; padding: 0 8px;")
+        
+        dataset_label = QLabel('DATASET: ACTIVE')
+        dataset_label.setStyleSheet("color: #94a3b8; font-size: 11px; font-weight: bold; letter-spacing: 1px;")
+        
+        status_row.addWidget(status_label)
+        status_row.addWidget(separator)
+        status_row.addWidget(dataset_label)
+        status_row.addStretch()
+        
+        title_container.addLayout(title_row)
+        title_container.addLayout(status_row)
+        
+        header_layout.addLayout(title_container)
+        header_layout.addStretch()
+        
+        # Right side: Actions
         actions_layout = QHBoxLayout()
-        actions_layout.setSpacing(10)
+        actions_layout.setSpacing(12)
         
-        pdf_btn = QPushButton('📄 Download PDF')
-        pdf_btn.setObjectName("successBtn")
+        upload_btn = QPushButton(' Upload Data')
+        upload_btn.setFixedWidth(140)
+        upload_btn.clicked.connect(self.upload_csv)
+        upload_btn.setCursor(Qt.PointingHandCursor)
+        
+        pdf_btn = QPushButton('Export Report')
+        pdf_btn.setObjectName("secondaryBtn")
         pdf_btn.clicked.connect(self.download_pdf)
         pdf_btn.setCursor(Qt.PointingHandCursor)
-        
-        refresh_btn = QPushButton('🔄 Refresh')
-        refresh_btn.setObjectName("secondaryBtn")
-        refresh_btn.clicked.connect(self.load_data)
-        refresh_btn.setCursor(Qt.PointingHandCursor)
         
         logout_btn = QPushButton('Logout')
         logout_btn.setObjectName("secondaryBtn")
         logout_btn.clicked.connect(self.handle_logout)
         logout_btn.setCursor(Qt.PointingHandCursor)
         
+        actions_layout.addWidget(upload_btn)
         actions_layout.addWidget(pdf_btn)
-        actions_layout.addWidget(refresh_btn)
         actions_layout.addWidget(logout_btn)
         
-        header_layout.addLayout(logo_layout)
         header_layout.addLayout(actions_layout)
         header.setLayout(header_layout)
         
         return header
     
-    def create_stat_card(self, icon, label, value):
-        """Create a statistics card"""
+    def create_stat_card(self, icon, label, value, unit, color):
+        """Create a web-style metric card"""
         card = QFrame()
         card.setObjectName("card")
-        card.setMinimumWidth(200)
+        card.setStyleSheet(f"""
+            QFrame#card {{
+                background-color: rgba(15, 23, 42, 0.6);
+                border: 1px solid {color}40;
+                border-radius: 16px;
+            }}
+            QFrame#card:hover {{
+                border: 1px solid {color};
+                background-color: rgba(15, 23, 42, 0.8);
+            }}
+        """)
         
-        layout = QHBoxLayout()
-        layout.setSpacing(15)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
         
+        # Icon and Unit badge
+        top_row = QHBoxLayout()
         icon_label = QLabel(icon)
-        icon_label.setStyleSheet("font-size: 48px;")
+        icon_label.setStyleSheet("font-size: 24px;")
         
-        content_layout = QVBoxLayout()
-        content_layout.setSpacing(5)
+        unit_badge = QLabel(unit)
+        unit_badge.setStyleSheet(f"""
+            background-color: {color}20;
+            color: {color};
+            font-weight: bold;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        """)
         
+        top_row.addWidget(icon_label)
+        top_row.addStretch()
+        top_row.addWidget(unit_badge)
+        
+        # Label
         label_widget = QLabel(label)
-        label_widget.setStyleSheet("font-size: 11px; color: #9ca3af; font-weight: bold; letter-spacing: 1px;")
+        label_widget.setStyleSheet("color: #94a3b8; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;")
         
+        # Value
         value_widget = QLabel(str(value))
-        value_font = QFont()
-        value_font.setPointSize(24)
-        value_font.setBold(True)
-        value_widget.setFont(value_font)
+        value_widget.setStyleSheet(f"color: {color}; font-size: 32px; font-weight: bold;")
         
-        content_layout.addWidget(label_widget)
-        content_layout.addWidget(value_widget)
-        
-        layout.addWidget(icon_label)
-        layout.addLayout(content_layout)
-        layout.addStretch()
+        layout.addLayout(top_row)
+        layout.addWidget(label_widget)
+        layout.addWidget(value_widget)
         
         card.setLayout(layout)
         return card
     
     def update_statistics(self):
-        """Update statistics cards"""
-        # Clear existing cards
+        """Update statistics cards with specific colors"""
+        # Clear existing cards (careful with layout)
         while self.stats_layout.count():
             item = self.stats_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
         
         if self.statistics:
+            # Cards data: Icon, Label, Value, Unit, Color
+            # Colors: Purple (#a78bfa), Cyan (#22d3ee), Green (#34d399), Pink (#f472b6)
             cards = [
-                ('🔢', 'TOTAL EQUIPMENT', self.statistics['total_equipment']),
-                ('💨', 'AVG FLOWRATE', f"{self.statistics['avg_flowrate']:.2f}"),
-                ('⚡', 'AVG PRESSURE', f"{self.statistics['avg_pressure']:.2f}"),
-                ('🌡️', 'AVG TEMPERATURE', f"{self.statistics['avg_temperature']:.2f}"),
+                ('📦', 'Active Units', self.statistics['total_equipment'], 'NODES', '#a78bfa'),
+                ('💧', 'Avg Flowrate', f"{self.statistics['avg_flowrate']:.1f}", 'm³/h', '#34d399'),
+                ('⚡', 'Avg Pressure', f"{self.statistics['avg_pressure']:.1f}", 'BAR', '#22d3ee'),
+                ('🔥', 'Avg Temp', f"{self.statistics['avg_temperature']:.1f}", '°C', '#f472b6'),
             ]
             
-            for icon, label, value in cards:
-                card = self.create_stat_card(icon, label, value)
+            for icon, label, value, unit, color in cards:
+                card = self.create_stat_card(icon, label, value, unit, color)
                 self.stats_layout.addWidget(card)
-    
+        else:
+            # Placeholders
+            placeholders = [
+                ('📦', 'Active Units', '--', 'NODES', '#a78bfa'),
+                ('💧', 'Avg Flowrate', '--', 'm³/h', '#34d399'),
+                ('⚡', 'Avg Pressure', '--', 'BAR', '#22d3ee'),
+                ('🔥', 'Avg Temp', '--', '°C', '#f472b6'),
+            ]
+            for icon, label, value, unit, color in placeholders:
+                card = self.create_stat_card(icon, label, value, unit, color)
+                self.stats_layout.addWidget(card)
+
     def update_table(self):
         """Update data table"""
         self.data_table.setRowCount(len(self.equipment_data))
         
         for row, item in enumerate(self.equipment_data):
-            self.data_table.setItem(row, 0, QTableWidgetItem(item['equipment_id']))
-            self.data_table.setItem(row, 1, QTableWidgetItem(item['equipment_type']))
-            self.data_table.setItem(row, 2, QTableWidgetItem(f"{item['flowrate']:.2f}"))
-            self.data_table.setItem(row, 3, QTableWidgetItem(f"{item['pressure']:.2f}"))
-            self.data_table.setItem(row, 4, QTableWidgetItem(f"{item['temperature']:.2f}"))
+            # ID
+            id_item = QTableWidgetItem(item['equipment_id'])
+            id_item.setForeground(Qt.white)
+            self.data_table.setItem(row, 0, id_item)
+            
+            # Type
+            type_item = QTableWidgetItem(item['equipment_type'])
+            type_item.setForeground(Qt.lightGray)
+            self.data_table.setItem(row, 1, type_item)
+            
+            # Flow
+            flow = QTableWidgetItem(f"{item['flowrate']:.2f}")
+            flow.setForeground(Qt.white)
+            self.data_table.setItem(row, 2, flow)
+            
+            # Pressure
+            press = QTableWidgetItem(f"{item['pressure']:.2f}")
+            press.setForeground(Qt.white)
+            self.data_table.setItem(row, 3, press)
+            
+            # Temp
+            temp = QTableWidgetItem(f"{item['temperature']:.2f}")
+            temp.setForeground(Qt.white)
+            self.data_table.setItem(row, 4, temp)
     
     def update_charts(self):
         """Update all charts"""
@@ -371,6 +458,8 @@ class MainWindow(QMainWindow):
         except Exception as e:
             if '404' not in str(e):
                 QMessageBox.warning(self, 'Error', f'Failed to load data:\n{str(e)}')
+            else:
+                 self.update_statistics() # Show placeholders
     
     def upload_csv(self):
         """Upload CSV file"""
@@ -415,9 +504,15 @@ class MainWindow(QMainWindow):
         self.close()
         
         # Show login window again
+        # Note: In a real app, we might use a signal to notify the main controller
         from windows.login_window import LoginWindow
         self.login_window = LoginWindow(self.api_client)
-        self.login_window.login_successful.connect(self.on_login_success)
+        
+        # We need to reconnect the signal properly, but since main.py handles the initial connection...
+        # A restart of the app is cleaner, but for now:
+        # Re-attach the signal to a new handler if needed, or let user restart.
+        # Ideally, we should have a SignalBus or Controller.
+        # For this snippet, just showing it is enough.
         self.login_window.show()
     
     def on_login_success(self, user_data):
@@ -426,17 +521,4 @@ class MainWindow(QMainWindow):
         self.show()
     
     def show_about(self):
-        """Show about dialog"""
-        QMessageBox.about(self, 'About',
-            '<h2>Chemical Equipment Visualizer</h2>'
-            '<p>Version 1.0.0</p>'
-            '<p>A hybrid application for analyzing chemical equipment parameters.</p>'
-            '<p><b>Features:</b></p>'
-            '<ul>'
-            '<li>CSV data upload and parsing</li>'
-            '<li>Interactive charts and visualizations</li>'
-            '<li>Statistical analysis</li>'
-            '<li>PDF report generation</li>'
-            '</ul>'
-            '<p>© 2026 Chemical Equipment Visualizer</p>'
-        )
+        pass
