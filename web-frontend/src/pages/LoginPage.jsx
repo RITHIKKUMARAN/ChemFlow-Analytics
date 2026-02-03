@@ -4,6 +4,7 @@ import { authAPI } from '../utils/api';
 import gsap from 'gsap';
 import Scene from '../components/canvas/Scene';
 import FloatingNav from '../components/layout/FloatingNav';
+import { Atom } from 'lucide-react';
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -83,10 +84,11 @@ export default function LoginPage() {
                 <div className="relative glass-panel rounded-2xl p-8 border border-white/10">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/20">
-                            <span className="text-3xl">👋</span>
+                        <div className="flex items-center justify-center gap-3 mb-6">
+                            <Atom className="w-8 h-8 text-cyan-400" />
+                            <span className="text-xl font-bold font-display tracking-tight text-white">ChemFlow</span>
                         </div>
-                        <h1 className="text-3xl font-['Space_Grotesk'] font-bold text-white mb-2">
+                        <h1 className="text-2xl font-bold text-white mb-2">
                             Welcome Back
                         </h1>
                         <p className="text-slate-400">

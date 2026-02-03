@@ -8,7 +8,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from django.db.models import Avg, Count
 from django.utils.timezone import localtime
 from .models import Equipment
@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+from mpl_toolkits.mplot3d import Axes3D
 
 def parse_csv_file(file_obj):
     """
@@ -57,7 +58,6 @@ def parse_csv_file(file_obj):
         # Smart column mapping
         column_mapping = {
             'Equipment Name': 'Equipment_ID',
-            'Equipment Name': 'Equipment_ID', # Duplicate for safety
             'Name': 'Equipment_ID',
             'ID': 'Equipment_ID',
             'Type': 'Equipment_Type',
@@ -118,7 +118,6 @@ def detect_anomalies(df):
     
     for _, row in df.iterrows():
         status = 'Normal'
-        reasons = []
         
         # Check Critical ( > 2 STD)
         if (abs(row['Flowrate'] - stats['flow']['mean']) > 2 * stats['flow']['std'] or
@@ -140,12 +139,6 @@ def detect_anomalies(df):
 def compute_statistics(dataset_id):
     """
     Compute summary statistics for a dataset
-    
-    Args:
-        dataset_id: ID of the Dataset object
-        
-    Returns:
-        dict: Summary statistics
     """
     equipment_queryset = Equipment.objects.filter(dataset_id=dataset_id)
     
@@ -174,8 +167,6 @@ def compute_statistics(dataset_id):
 
 def generate_chart_image(dataset_id, chart_type='distribution'):
     """Generate chart and return as BytesIO"""
-    plt.figure(figsize=(7, 4))
-    
     # Fetch data
     equipment = Equipment.objects.filter(dataset_id=dataset_id)
     df = pd.DataFrame(list(equipment.values()))
@@ -183,180 +174,267 @@ def generate_chart_image(dataset_id, chart_type='distribution'):
     buf = BytesIO()
     
     if chart_type == 'distribution':
+        plt.figure(figsize=(7, 4))
         sns.set_style("darkgrid")
         ax = sns.countplot(data=df, x='equipment_type', palette='viridis')
-        plt.title('Equipment Distribution', fontsize=14, pad=10)
-        plt.xlabel('Equipment Type')
+        plt.title('Equipment Distribution', fontsize=12, pad=10)
+        plt.xlabel('Type')
         plt.ylabel('Count')
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=30)
         plt.tight_layout()
+        plt.savefig(buf, format='png', dpi=150)
+        plt.close()
         
     elif chart_type == 'parameters':
         fig, axes = plt.subplots(1, 3, figsize=(8, 4))
         sns.set_style("whitegrid")
         
         sns.boxplot(y=df['flowrate'], ax=axes[0], color='#4F8CFF')
-        axes[0].set_title('Flowrate (m³/h)')
+        axes[0].set_title('Flowrate (m³/h)', fontsize=10)
         axes[0].set_ylabel('')
         
         sns.boxplot(y=df['pressure'], ax=axes[1], color='#2ED573')
-        axes[1].set_title('Pressure (Bar)')
+        axes[1].set_title('Pressure (Bar)', fontsize=10)
         axes[1].set_ylabel('')
         
         sns.boxplot(y=df['temperature'], ax=axes[2], color='#FF4757')
-        axes[2].set_title('Temp (°C)')
+        axes[2].set_title('Temp (°C)', fontsize=10)
         axes[2].set_ylabel('')
         
         plt.tight_layout()
+        plt.savefig(buf, format='png', dpi=150)
+        plt.close()
 
-    plt.savefig(buf, format='png', dpi=150)
-    plt.close()
+    elif chart_type == 'digital_twin':
+        # Generate a 3D Scatter plot to simulate Digital Twin view
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Map Equipment Type to Colors
+        types = df['equipment_type'].unique()
+        colors_map = plt.cm.viridis(range(len(types)))
+        
+        for i, eq_type in enumerate(types):
+            subset = df[df['equipment_type'] == eq_type]
+            # Use columns as pseudo-coordinates if real coords aren't available
+            # Normalized for visualization
+            xs = subset['flowrate']
+            ys = subset['temperature']
+            zs = subset['pressure']
+            ax.scatter(xs, ys, zs, label=eq_type, s=100, alpha=0.8)
+
+        ax.set_xlabel('Flow')
+        ax.set_ylabel('Temp')
+        ax.set_zlabel('Pressure')
+        ax.set_title('3D Parameter Spatial Analysis', fontsize=12)
+        ax.view_init(elev=20., azim=-35)
+        
+        plt.tight_layout()
+        plt.savefig(buf, format='png', dpi=150)
+        plt.close()
+        
     buf.seek(0)
     return buf
 
+def draw_page_template(canvas, doc):
+    """Draws background and watermark on every page"""
+    canvas.saveState()
+    
+    # 1. Background Color (Very light violet/green tint)
+    # Using #fdfcfe (very light indigo tint) ensuring readability of text
+    canvas.setFillColor(colors.HexColor('#f5f3ff')) 
+    canvas.rect(0, 0, letter[0], letter[1], fill=True, stroke=False)
+    
+    # 2. Watermark Top-Right
+    canvas.setFont('Helvetica-Bold', 12)
+    canvas.setFillColor(colors.HexColor('#6366f1')) # Indigo brand color
+    
+    # Draw Logo and Text "ChemFlow"
+    # Starting from top right corner
+    w, h = letter
+    canvas.drawRightString(w - 0.5*inch, h - 0.5*inch, "ChemFlow Analytics")
+    
+    # Optional: Draw a small colored line/accent
+    canvas.setStrokeColor(colors.HexColor('#6366f1'))
+    canvas.setLineWidth(2)
+    canvas.line(w - 2*inch, h - 0.6*inch, w - 0.5*inch, h - 0.6*inch)
+    
+    canvas.restoreState()
+
 def generate_pdf_report(dataset, statistics):
     """
-    Generate PDF report using ReportLab with Charts
-    
-    Args:
-        dataset: Dataset model instance
-        statistics: Dictionary of computed statistics
-        
-    Returns:
-        BytesIO: PDF file buffer
+    Generate Premium High-Density PDF Report
     """
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, 
+                            topMargin=0.8*inch, bottomMargin=0.5*inch, 
+                            leftMargin=0.5*inch, rightMargin=0.5*inch)
     
-    # Container for PDF elements
+    # --- DATA FETCHING ---
+    anomalies = Equipment.objects.filter(dataset=dataset).exclude(status='Normal').order_by('status')
+    top_equipment = Equipment.objects.filter(dataset=dataset).order_by('-flowrate')[:50]
+    
     elements = []
     
-    # Styles
+    # --- COLORS & STYLES ---
+    # Brand Palette
+    c_dark = colors.HexColor('#0f172a')
+    c_indigo = colors.HexColor('#4f46e5')
+    c_cyan = colors.HexColor('#06b6d4')
+    c_rose = colors.HexColor('#e11d48')
+    c_emerald = colors.HexColor('#10b981')
+    c_slate = colors.HexColor('#64748b')
+    c_light_card = colors.white
+    
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#1a365d'),
-        spaceAfter=30,
-        alignment=TA_CENTER
+    
+    # Custom Heading
+    h1_style = ParagraphStyle(
+        'H1', parent=styles['Heading1'], fontSize=22, textColor=c_dark, spaceAfter=20, fontName='Helvetica-Bold'
     )
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=16,
-        textColor=colors.HexColor('#2c5282'),
-        spaceAfter=12,
-        spaceBefore=12
+    h2_style = ParagraphStyle(
+        'H2', parent=styles['Heading2'], fontSize=16, textColor=c_indigo, spaceBefore=25, spaceAfter=15, 
+        borderPadding=(0,0,5,0), borderWidth=1, borderColor=colors.HexColor('#f5f3ff'), borderBottomColor=c_indigo
     )
     
-    # Title
-    title = Paragraph("Chemical Equipment Parameter Report", title_style)
-    elements.append(title)
-    elements.append(Spacer(1, 0.3*inch))
+    # Card Styles (Split Label and Value to avoid collision)
+    card_label_style = ParagraphStyle('CL', parent=styles['Normal'], fontSize=9, textColor=c_slate, alignment=TA_CENTER)
+    card_value_style = ParagraphStyle('CV', parent=styles['Normal'], fontSize=16, textColor=c_dark, alignment=TA_CENTER, fontName='Helvetica-Bold', leading=20)
     
-    # Dataset Information
-    dataset_info = [
-        ['Dataset Information', ''],
-        ['Filename:', dataset.filename],
-        ['Upload Date:', localtime(dataset.upload_timestamp).strftime('%Y-%m-%d %H:%M:%S')],
-        ['Total Equipment:', str(statistics['total_equipment'])],
-    ]
+    # --- HEADER ---
+    gen_time = localtime().strftime('%B %d, %Y • %I:%M %p')
+    user_display = dataset.user.username if dataset.user else "System User"
     
-    dataset_table = Table(dataset_info, colWidths=[2.5*inch, 4*inch])
-    dataset_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2c5282')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 14),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+    # Title Block
+    elements.append(Paragraph(f"Dataset: {dataset.filename}", h1_style))
+    elements.append(Paragraph(f"<b>Generated For:</b> {user_display} &nbsp;|&nbsp; <b>Date:</b> {gen_time}", 
+                              ParagraphStyle('Meta', fontSize=10, textColor=c_slate, spaceAfter=25)))
+    
+    # --- EXECUTIVE SUMMARY CARDS ---
+    def create_card_cell(label, value, value_color):
+        v_style = ParagraphStyle('V', parent=card_value_style, textColor=value_color)
+        return [
+            Paragraph(label, card_label_style),
+            Spacer(1, 6),
+            Paragraph(value, v_style)
+        ]
+
+    card_data = [[
+        create_card_cell("TOTAL UNITS", str(statistics['total_equipment']), c_dark),
+        create_card_cell("AVG FLOW", f"{statistics['avg_flowrate']:.1f} m³/h", c_cyan),
+        create_card_cell("AVG PRESS", f"{statistics['avg_pressure']:.1f} bar", c_indigo),
+        create_card_cell("AVG TEMP", f"{statistics['avg_temperature']:.1f} °C", c_rose),
+    ]]
+    
+    card_table = Table(card_data, colWidths=[1.8*inch]*4)
+    card_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), c_light_card),
+        ('GRID', (0,0), (-1,-1), 8, colors.HexColor('#f5f3ff')), # Thick gap to simulate separate cards
+        ('TOPPADDING', (0,0), (-1,-1), 12),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOX', (0,0), (-1,-1), 0.5, colors.lightgrey), # subtle border
     ]))
-    elements.append(dataset_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(card_table)
     
-    # Summary Statistics
-    elements.append(Paragraph("Summary Statistics", heading_style))
+    # --- ANOMALY REPORT (Moved to Page 1) ---
+    elements.append(Spacer(1, 0.4*inch))
+    if anomalies.exists():
+        elements.append(Paragraph(f"Critical Anomalies Detected ({anomalies.count()})", h2_style))
+        elements.append(Paragraph("The following equipment units are operating outside nominal safety thresholds.", styles['Normal']))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        anomaly_data = [['ID', 'Type', 'Status', 'Flow', 'Press', 'Temp']]
+        for eq in anomalies[:50]:
+            status_color = c_rose if eq.status == 'Critical' else colors.orange
+            row = [
+                Paragraph(f"<b>{eq.equipment_id}</b>", styles['Normal']),
+                eq.equipment_type,
+                Paragraph(f"<font color='{status_color}'><b>{eq.status.upper()}</b></font>", styles['Normal']),
+                f"{eq.flowrate:.1f}",
+                f"{eq.pressure:.1f}",
+                f"{eq.temperature:.1f}"
+            ]
+            anomaly_data.append(row)
+            
+        anom_table = Table(anomaly_data, colWidths=[1.5*inch, 1.5*inch, 1.2*inch, 1*inch, 1*inch, 1*inch])
+        anom_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), c_rose),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0,0), (-1,0), 10),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#fff1f2')]),
+        ]))
+        elements.append(anom_table)
+    else:
+        elements.append(Spacer(1, 0.4*inch))
+        elements.append(Paragraph("System Health Check: <b>Normal</b>", styles['Normal']))
+        elements.append(Paragraph("All equipment units are operating within nominal parameters. No critical anomalies detected.", styles['Normal']))
     
-    summary_data = [
-        ['Metric', 'Value'],
-        ['Average Flowrate', f"{statistics['avg_flowrate']:.2f}"],
-        ['Average Pressure', f"{statistics['avg_pressure']:.2f}"],
-        ['Average Temperature', f"{statistics['avg_temperature']:.2f}"],
-    ]
-    
-    summary_table = Table(summary_data, colWidths=[3*inch, 3.5*inch])
-    summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4299e1')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.aliceblue),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 11),
-    ]))
-    elements.append(summary_table)
-    elements.append(Spacer(1, 0.3*inch))
-    
-    # Equipment Type Distribution Table
-    elements.append(Paragraph("Equipment Type Distribution", heading_style))
-    
-    distribution_data = [['Equipment Type', 'Count']]
-    for eq_type, count in statistics['equipment_type_distribution'].items():
-        distribution_data.append([eq_type, str(count)])
-    
-    distribution_table = Table(distribution_data, colWidths=[3*inch, 3.5*inch])
-    distribution_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#48bb78')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.lightgreen, colors.HexColor('#c6f6d5')]),
-    ]))
-    elements.append(distribution_table)
-    elements.append(Spacer(1, 0.3*inch))
-    
-    # -- CHARTS SECTION --
+    # --- PAGE 2: VISUAL ANALYTICS ---
     elements.append(PageBreak())
-    elements.append(Paragraph("Visual Analytics", title_style))
+    elements.append(Paragraph("Visual Analytics Dashboard", h1_style))
     
-    # 1. Distribution Chart
-    elements.append(Paragraph("Equipment Distribution", heading_style))
-    dist_chart_buf = generate_chart_image(dataset.id, 'distribution')
-    elements.append(Image(dist_chart_buf, width=6*inch, height=3.5*inch))
+    # 3D Digital Twin Snapshot
+    elements.append(Paragraph("Thermal & Spatial Profile (Digital Twin)", h2_style))
+    dt_image = generate_chart_image(dataset.id, 'digital_twin')
+    elements.append(Image(dt_image, width=6.5*inch, height=4*inch))
+    
+    # Statistical Charts
+    elements.append(Paragraph("Inventory Distribution & Parameter Dynamics", h2_style))
+    chart1 = generate_chart_image(dataset.id, 'distribution')
+    chart2 = generate_chart_image(dataset.id, 'parameters')
+    
+    chart_data = [[Image(chart1, width=3.2*inch, height=2.2*inch), Image(chart2, width=4.0*inch, height=2.2*inch)]]
+    chart_table = Table(chart_data, colWidths=[3.3*inch, 4.1*inch])
+    chart_table.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'TOP')]))
+    elements.append(chart_table)
+    
+    # --- PAGE 3: DETAILED MANIFEST ---
+    elements.append(PageBreak())
+    elements.append(Paragraph("Equipment Data Manifest", h2_style))
+    
+    data_header = [['Equipment ID', 'Type', 'Flow (m³/h)', 'Press (bar)', 'Temp (°C)', 'Status']]
+    data_rows = []
+    
+    for eq in top_equipment:
+        s_color = c_emerald
+        if eq.status == 'Critical': s_color = c_rose
+        elif eq.status == 'Warning': s_color = colors.orange
+        
+        row = [
+            eq.equipment_id,
+            eq.equipment_type,
+            f"{eq.flowrate:.2f}",
+            f"{eq.pressure:.2f}",
+            f"{eq.temperature:.1f}",
+            Paragraph(f"<font color='{s_color}'>● {eq.status}</font>", styles['Normal'])
+        ]
+        data_rows.append(row)
+        
+    full_table_data = data_header + data_rows
+    
+    main_table = Table(full_table_data, colWidths=[1.8*inch, 1.5*inch, 1*inch, 1*inch, 1*inch, 1.2*inch], repeatRows=1)
+    main_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), c_dark),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ('GRID', (0,0), (-1,-1), 0.25, colors.lightgrey),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.white]),
+        ('ALIGN', (2,0), (4,-1), 'RIGHT'),
+    ]))
+    elements.append(main_table)
+    
+    # --- FOOTER ---
     elements.append(Spacer(1, 0.5*inch))
+    elements.append(Paragraph("© 2026 ChemFlow Analytics. Confidential Document.", 
+                              ParagraphStyle('Footer', textColor=c_slate, fontSize=8, alignment=TA_CENTER)))
     
-    # 2. Parameter Distribution Boxplots
-    elements.append(Paragraph("Parameter Variability (Box Plots)", heading_style))
-    param_chart_buf = generate_chart_image(dataset.id, 'parameters')
-    elements.append(Image(param_chart_buf, width=7*inch, height=3.5*inch))
-    
-    # Footer
-    elements.append(Spacer(1, 0.5*inch))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.grey,
-        alignment=TA_CENTER
-    )
-    footer = Paragraph(
-        "Generated by Chemical Equipment Parameter Visualizer | Hybrid Application",
-        footer_style
-    )
-    elements.append(footer)
-    
-    # Build PDF
-    doc.build(elements)
+    # Build with Page Template callback
+    doc.build(elements, onFirstPage=draw_page_template, onLaterPages=draw_page_template)
     buffer.seek(0)
     return buffer
