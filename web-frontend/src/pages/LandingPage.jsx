@@ -120,7 +120,7 @@ export default function LandingPage() {
                         ref={subtitleRef}
                         className="text-xl sm:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed mb-10"
                     >
-                        Monitor, analyze, and optimize chemical processes with{' '}
+                        Monitor, analyze and optimize chemical processes with{' '}
                         <span className="text-cyan-400 font-medium">AI-powered insights</span>{' '}
                         and predictive intelligence
                     </p>
