@@ -1,4 +1,4 @@
-import { Github, Globe } from 'lucide-react';
+import { Github, Linkedin } from 'lucide-react';
 
 export default function BuiltBy() {
     return (
@@ -38,13 +38,13 @@ export default function BuiltBy() {
                                 </a>
 
                                 <a
-                                    href="https://rithikkumarank-portfolio.vercel.app/"
+                                    href="https://www.linkedin.com/in/rithikkumarank/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 rounded-full bg-white/5 hover:bg-violet-600 border border-white/5 hover:border-white/30 transition-all duration-300 group/icon relative overflow-hidden hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-500/20"
-                                    aria-label="Portfolio"
+                                    className="p-2 rounded-full bg-white/5 hover:bg-blue-600 border border-white/5 hover:border-white/30 transition-all duration-300 group/icon relative overflow-hidden hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20"
+                                    aria-label="LinkedIn Profile"
                                 >
-                                    <Globe className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors relative z-10" />
+                                    <Linkedin className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors relative z-10" />
                                 </a>
                             </div>
                         </div>

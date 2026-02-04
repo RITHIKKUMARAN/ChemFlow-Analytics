@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Github, Globe, Cpu } from 'lucide-react';
+import { Github, Linkedin, Cpu } from 'lucide-react';
 
 export default function CreatorWidget() {
     const [expanded, setExpanded] = useState(false);
@@ -76,12 +76,12 @@ export default function CreatorWidget() {
                             </a>
 
                             <a
-                                href="https://rithikkumarank-portfolio.vercel.app/"
+                                href="https://www.linkedin.com/in/rithikkumarank/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 rounded-full bg-white/5 hover:bg-emerald-600 border border-white/5 hover:border-white/20 transition-all duration-300 group/icon hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/30"
+                                className="p-2 rounded-full bg-white/5 hover:bg-blue-600 border border-white/5 hover:border-white/20 transition-all duration-300 group/icon hover:scale-110 hover:shadow-lg hover:shadow-blue-500/30"
                             >
-                                <Globe className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors" />
+                                <Linkedin className="w-4 h-4 text-slate-400 group-hover/icon:text-white transition-colors" />
                             </a>
                         </div>
                     </div>
